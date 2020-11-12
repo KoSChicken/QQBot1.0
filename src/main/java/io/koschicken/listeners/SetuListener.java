@@ -4,7 +4,6 @@ import com.forte.qqrobot.anno.Filter;
 import com.forte.qqrobot.anno.Listen;
 import com.forte.qqrobot.beans.cqcode.CQCode;
 import com.forte.qqrobot.beans.messages.msgget.GroupMsg;
-import com.forte.qqrobot.beans.messages.msgget.PrivateMsg;
 import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
 import com.forte.qqrobot.sender.MsgSender;
 import com.forte.qqrobot.utils.CQCodeUtil;
@@ -18,7 +17,6 @@ import org.apache.http.client.fluent.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -39,13 +37,13 @@ public class SetuListener {
     private static final String TEMP = "./temp/SETU/";
     private static final String ARTWORK_PREFIX = "https://www.pixiv.net/artworks/";
     private static final String ARTIST_PREFIX = "https://www.pixiv.net/users/";
+    private static final String AVATAR_API = "http://thirdqq.qlogo.cn/g?b=qq&nk=";
     private static final int CD = 20;
     private static final String CQ_AT = "[CQ:at,qq=";
     private static final HashMap<String, Integer> NUMBER;
     private static HashMap<String, HashMap<String, LocalDateTime>> coolDown;
 
-    @Value("${setu.price}")
-    private static double PRICE;
+    private static final double PRICE = 50;
 
     static {
         NUMBER = new HashMap<>();
@@ -62,9 +60,6 @@ public class SetuListener {
         NUMBER.put("九", 9);
         NUMBER.put("十", 10);
         NUMBER.put("几", RandomUtils.nextInt(1, 4));
-        if (Objects.isNull(PRICE)) {
-            PRICE = 50;
-        }
     }
 
     static {
@@ -91,12 +86,7 @@ public class SetuListener {
             } else {
                 if (coin.getScore() >= PRICE) {
                     String message = msg.getMsg();
-                    String regex;
-                    if (message.startsWith("叫车")) {
-                        regex = "叫车(.*)(.*)?(|r18)";
-                    } else {
-                        regex = "来(.*?)[点丶份张幅](.*?)的?(|r18)[色瑟涩][图圖]";
-                    }
+                    String regex = message.startsWith("叫车") ? "叫车(.*)(.*)?(|r18)" : "来(.*?)[点丶份张幅](.*?)的?(|r18)[色瑟涩][图圖]";
                     Pattern p = Pattern.compile(regex);
                     Matcher m = p.matcher(message);
                     int num = 1;
@@ -107,28 +97,15 @@ public class SetuListener {
                         // 兼容原有的叫车功能
                         if (message.startsWith("叫车")) {
                             number = m.group(2).trim();
-                            try {
-                                if (NUMBER.get(number) == null) {
-                                    num = Integer.parseInt(number);
-                                } else {
-                                    num = NUMBER.get(number);
-                                }
-                            } catch (NumberFormatException ignore) {
-                                LOGGER.info("number set to 1");
-                            }
                             tag = m.group(1).trim();
                         } else {
-                            try {
-                                number = m.group(1).trim();
-                                if (NUMBER.get(number) == null) {
-                                    num = Integer.parseInt(number);
-                                } else {
-                                    num = NUMBER.get(number);
-                                }
-                            } catch (NumberFormatException ignore) {
-                                LOGGER.info("number set to 1");
-                            }
+                            number = m.group(1).trim();
                             tag = m.group(2).trim();
+                        }
+                        try {
+                            num = NUMBER.get(number) == null ? Integer.parseInt(number) : NUMBER.get(number);
+                        } catch (NumberFormatException ignore) {
+                            LOGGER.info("number set to 1");
                         }
                         r18 = !StringUtils.isEmpty(m.group(3).trim());
                     }
@@ -156,16 +133,14 @@ public class SetuListener {
         scores.setQq(msg.getCodeNumber());
         scores.setScore(0);
         scoresService.save(scores);
-        sender.SENDER.sendGroupMsg(msg.getGroupCode(), CQ_AT + msg.getQQCode() + "]" +
-                "你没钱了，请尝试签到或找开发者PY");
+        sender.SENDER.sendGroupMsg(msg.getGroupCode(), CQ_AT + msg.getQQCode() + "]" + "你没钱了，请尝试签到或找开发者PY");
     }
 
-    private void groupMember(GroupMsg msg, MsgSender sender, Long QQ) {
-        String AVATAR_API = "http://thirdqq.qlogo.cn/g?b=qq&nk=";
-        String api = AVATAR_API + QQ.toString() + "&s=640";
+    private void groupMember(GroupMsg msg, MsgSender sender, Long qq) {
+        String api = AVATAR_API + qq.toString() + "&s=640";
         try {
             InputStream imageStream = Request.Get(api).execute().returnResponse().getEntity().getContent();
-            File pic = new File(TEMP + QQ.toString() + System.currentTimeMillis() + ".jpg");
+            File pic = new File(TEMP + qq.toString() + System.currentTimeMillis() + ".jpg");
             FileUtils.copyInputStreamToFile(imageStream, pic);
             CQCode cqCodeImage = CQCodeUtil.build().getCQCode_Image(pic.getAbsolutePath());
             LOGGER.info(pic.getAbsolutePath());
@@ -177,81 +152,10 @@ public class SetuListener {
         }
     }
 
-    @Listen(MsgGetTypes.privateMsg)
-    @Filter(value = {"叫车(.*)(.*)?(|r18)", "来(.*?)[点丶份张幅](.*?)的?(|r18)[色瑟涩][图圖]"})
-    public void config(PrivateMsg msg, MsgSender sender) {
-        if (isCool(msg.getQQ(), "0")) {
-            Scores coin = scoresService.getById(msg.getCodeNumber());
-            if (coin == null) {
-                createScore(msg, sender);
-            } else if (coin.getScore() >= PRICE) {
-                String message = msg.getMsg();
-                String regex;
-                if (message.startsWith("叫车")) {
-                    regex = "叫车(.*)(.*)?(|r18)";
-                } else {
-                    regex = "来(.*?)[点丶份张幅](.*?)的?(|r18)[色瑟涩][图圖]";
-                }
-                Pattern p = Pattern.compile(regex);
-                Matcher m = p.matcher(message);
-                int num = 1;
-                String tag = "";
-                boolean r18 = false;
-                String number;
-                while (m.find()) {
-                    // 兼容原有的叫车功能
-                    if (message.startsWith("叫车")) {
-                        number = m.group(2).trim();
-                        try {
-                            if (NUMBER.get(number) == null) {
-                                num = Integer.parseInt(number);
-                            } else {
-                                num = NUMBER.get(number);
-                            }
-                        } catch (NumberFormatException e) {
-                            LOGGER.info("不是数字，默认为1");
-                        }
-                        tag = m.group(1).trim();
-                    } else {
-                        try {
-                            number = m.group(1).trim();
-                            if (NUMBER.get(number) == null) {
-                                num = Integer.parseInt(number);
-                            } else {
-                                num = NUMBER.get(number);
-                            }
-                        } catch (NumberFormatException e) {
-                            LOGGER.info("不是数字，默认为1");
-                        }
-                        tag = m.group(2).trim();
-                    }
-                    r18 = !StringUtils.isEmpty(m.group(3).trim());
-                }
-                // 发图
-                SendSetu sendSetu = new SendSetu(null, msg.getQQ(), sender, tag, num, r18, coin, scoresService);
-                sendSetu.start();
-                refreshCooldown(msg.getQQ(), "0");
-            } else {
-                sender.SENDER.sendPrivateMsg(msg.getQQCode(), "你没钱了，请发送#签到获取今日5000币，如果已获取过请明天再来吧");
-            }
-        } else {
-            sender.SENDER.sendPrivateMsg(msg.getQQCode(), "叫车CD中...");
-        }
-    }
-
-    private void createScore(PrivateMsg msg, MsgSender sender) {
-        Scores scores = new Scores();
-        scores.setSignFlag(false);
-        scores.setQq(msg.getCodeNumber());
-        scores.setScore(0);
-        scoresService.save(scores);
-        sender.SENDER.sendPrivateMsg(msg.getQQCode(), "你没钱了，请发送#签到获取今日5000币，如果已获取过请明天再来吧");
-    }
-
     /**
      * 刷新冷却时间
      */
-    private void refreshCooldown(String QQ, String groupCode) {
+    private void refreshCooldown(String qq, String groupCode) {
         LocalDateTime localDateTime = LocalDateTime.now();
         if (coolDown == null) {
             coolDown = new HashMap<>();
@@ -260,7 +164,7 @@ public class SetuListener {
         if (hashMap == null) {
             hashMap = new HashMap<>();
         }
-        hashMap.put(QQ, localDateTime.plusSeconds(CD));
+        hashMap.put(qq, localDateTime.plusSeconds(CD));
         coolDown.put(groupCode, hashMap);
     }
 

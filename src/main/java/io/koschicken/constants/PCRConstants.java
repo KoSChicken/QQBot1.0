@@ -2,7 +2,6 @@ package io.koschicken.constants;
 
 public class PCRConstants {
 
-    public static final String CONFIG_DIR = "./config";
     public static int SSR_CHANCE = 25;
     public static int SR_CHANCE = 180;
     public static int R_CHANCE = 795;

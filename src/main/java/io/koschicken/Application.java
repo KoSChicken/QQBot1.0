@@ -27,6 +27,7 @@ public class Application {
         // 初始化数据库文件
         InitDatabase initDatabase = new InitDatabase();
         initDatabase.initDB();
+        InitConfig.initConfigs();
         // 启动
         SpringApplication.run(Application.class, args);
     }
@@ -55,7 +56,7 @@ public class Application {
 
     private static void writeBotConfig(Properties properties) {
         Scanner scanner = new Scanner(System.in);
-        LOGGER.info("未检测到账户文件，请输入所要登陆的qq账号");
+        LOGGER.info("未检测到账户文件，请输入所要登陆的 qq 账号");
         LOGGER.info("qq号:  ");
         String code = scanner.next();
         LOGGER.info("密码:  ");
@@ -63,7 +64,7 @@ public class Application {
         URL url = Application.class.getClassLoader().getResource("application.properties");
         try (OutputStream fos = new FileOutputStream(Objects.requireNonNull(url).getFile())){
             properties.setProperty("simbot.core.bots", code + ":" + path);
-            properties.store(fos, "");
+            properties.store(fos, "bot的账号和密码");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -71,12 +72,12 @@ public class Application {
 
     private static void writeBilibiliCookie(Properties properties) {
         Scanner scanner = new Scanner(System.in);
-        LOGGER.info("未检测到B站Cookie，会导致B站API无法调用，请填写：");
-        String cookie = scanner.next();
+        LOGGER.info("未检测到 B 站 Cookie，会导致 B 站 API 无法调用，请填写（Enter 键跳过）：");
+        String cookie = scanner.nextLine();
         URL url = Application.class.getClassLoader().getResource("application.properties");
         try (OutputStream fos = new FileOutputStream(Objects.requireNonNull(url).getFile())){
             properties.setProperty("bilibili.cookie", cookie);
-            properties.store(fos, "");
+            properties.store(fos, "B 站 Cookie，用于调用 B 站 API");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -84,12 +85,12 @@ public class Application {
 
     private static void writeLoliconApiKey(Properties properties) {
         Scanner scanner = new Scanner(System.in);
-        LOGGER.info("未检测到LoliconAPIKey，会导致API无法调用，请填写：");
-        String apiKey = scanner.next();
+        LOGGER.info("未检测到 LoliconAPIKey，会导致 API 无法调用，请填写（Enter 键跳过）：");
+        String apiKey = scanner.nextLine();
         URL url = Application.class.getClassLoader().getResource("application.properties");
         try (OutputStream fos = new FileOutputStream(Objects.requireNonNull(url).getFile())){
             properties.setProperty("lolicon.apiKey", apiKey);
-            properties.store(fos, "");
+            properties.store(fos, "Lolicon 的 APIKey，用于调用 setuAPI");
         } catch (IOException e) {
             e.printStackTrace();
         }
