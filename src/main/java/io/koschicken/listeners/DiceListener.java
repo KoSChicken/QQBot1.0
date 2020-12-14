@@ -17,6 +17,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static io.koschicken.constants.Constants.CQ_AT;
+
 @Component
 public class DiceListener {
 
@@ -185,6 +187,104 @@ public class DiceListener {
                 return "大";
             }
             return "";
+        }
+    }
+
+    @Listen(MsgGetTypes.groupMsg)
+    @Filter(value = {"#roll(.*)[-dD](.*)"})
+    public void roll(GroupMsg msg, MsgSender sender) {
+        if (msg.getMsg().contains("w")) {
+            return;
+        }
+        try {
+            String regex = "#roll(.*)[-dD](.*)";
+            String message = msg.getMsg();
+            Pattern p = Pattern.compile(regex);
+            Matcher m = p.matcher(message);
+            int count = 1;
+            int limit = 4;
+            while (m.find()) {
+                count = Math.max(Integer.parseInt(m.group(1).trim()), 1);
+                limit = Math.max(Integer.parseInt(m.group(2).trim()), 4);
+            }
+            if (count > 20) {
+                sender.SENDER.sendGroupMsg(msg.getGroupCode(), "你正常点，没那么多骰子给你扔。");
+                return;
+            }
+            StringBuilder sb = new StringBuilder();
+            sb.append("[CQ:at,qq=").append(msg.getQQ()).append("]roll出了");
+            for (int i = 0; i < count; i++) {
+                int singleDice = RandomUtils.nextInt(1, limit + 1);
+                sb.append("[").append(singleDice).append("]");
+                if (i != count - 1) {
+                    sb.append(", ");
+                }
+            }
+            sb.append("点，本次使用了").append(count).append("个").append(limit).append("面骰。");
+            sender.SENDER.sendGroupMsg(msg.getGroupCode(), sb.toString());
+        } catch (NumberFormatException e) {
+            sender.SENDER.sendGroupMsg(msg.getGroupCode(), "格式错误");
+        }
+    }
+
+    private int[] gameRoll() {
+        int[] result = new int[10];
+        for (int i = 0; i < 10; i++) {
+            result[i] = RandomUtils.nextInt(1, 11);
+        }
+        return result;
+    }
+
+    private boolean check(int[] arr) {
+        int valid = 0;
+        for (int j : arr) {
+            if (j >= 7) {
+                valid++;
+            }
+        }
+        return valid >= 7;
+    }
+
+    @Listen(MsgGetTypes.groupMsg)
+    @Filter(value = {"#roll10d10w"})
+    public void roll10D10W(GroupMsg msg, MsgSender sender) {
+        // sender.SENDER.sendGroupMsg(msg.getGroupCode(), "10d10w已被sbbot禁用");
+        try {
+            // 10d10，则进行金币翻倍判断
+            Scores scores = scoresService.getById(msg.getQQ());
+            if (scores.getRollCount() > 0) {
+                scores.setRollCount(scores.getRollCount() - 1);
+                scoresService.updateById(scores);
+                gameRoll10d10W(msg, sender, scores);
+            } else {
+                sender.SENDER.sendGroupMsg(msg.getGroupCode(), "次数已用尽");
+            }
+        } catch (NumberFormatException e) {
+            sender.SENDER.sendGroupMsg(msg.getGroupCode(), "格式错误");
+        }
+    }
+
+    private void gameRoll10d10W(GroupMsg msg, MsgSender sender, Scores scores) {
+        int i = 0;
+        boolean check = false;
+        if (scores.getScore() < 25) {
+            sender.SENDER.sendGroupMsg(msg.getGroupCode(), CQ_AT + msg.getQQ() + "] 余额不足。");
+            return;
+        }
+        while (!check && scores.getScore() >= 25) {
+            i++;
+            int newScores = scores.getScore() - scores.getScore() / 25;
+            scores.setScore(newScores);
+            scoresService.updateById(scores);
+            check = check(gameRoll());
+            if (check) {
+                int max = (Integer.MAX_VALUE - 1) / 2;
+                newScores = scores.getScore() >= max ? Integer.MAX_VALUE : scores.getScore() * 2;
+                scores.setScore(newScores);
+                scoresService.updateById(scores);
+                sender.SENDER.sendGroupMsg(msg.getGroupCode(), CQ_AT + msg.getQQ() + "] 恭喜你，roll了" + i + "次，中了，余额：" + scores.getScore());
+                break;
+            }
         }
     }
 

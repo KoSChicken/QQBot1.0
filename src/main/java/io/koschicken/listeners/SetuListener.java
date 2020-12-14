@@ -41,9 +41,8 @@ public class SetuListener {
     private static final int CD = 20;
     private static final String CQ_AT = "[CQ:at,qq=";
     private static final HashMap<String, Integer> NUMBER;
-    private static HashMap<String, HashMap<String, LocalDateTime>> coolDown;
-
     private static final double PRICE = 50;
+    private static HashMap<String, HashMap<String, LocalDateTime>> coolDown;
 
     static {
         NUMBER = new HashMap<>();
@@ -130,17 +129,17 @@ public class SetuListener {
     private void createScore(GroupMsg msg, MsgSender sender) {
         Scores scores = new Scores();
         scores.setSignFlag(false);
-        scores.setQq(msg.getCodeNumber());
+        scores.setQq(msg.getQQ());
         scores.setScore(0);
         scoresService.save(scores);
         sender.SENDER.sendGroupMsg(msg.getGroupCode(), CQ_AT + msg.getQQCode() + "]" + "你没钱了，请尝试签到或找开发者PY");
     }
 
     private void groupMember(GroupMsg msg, MsgSender sender, Long qq) {
-        String api = AVATAR_API + qq.toString() + "&s=640";
+        String api = AVATAR_API + qq + "&s=640";
         try {
             InputStream imageStream = Request.Get(api).execute().returnResponse().getEntity().getContent();
-            File pic = new File(TEMP + qq.toString() + System.currentTimeMillis() + ".jpg");
+            File pic = new File(TEMP + qq + System.currentTimeMillis() + ".jpg");
             FileUtils.copyInputStreamToFile(imageStream, pic);
             CQCode cqCodeImage = CQCodeUtil.build().getCQCode_Image(pic.getAbsolutePath());
             LOGGER.info(pic.getAbsolutePath());
@@ -242,7 +241,7 @@ public class SetuListener {
                         }
                         // 发送图片
                         CQCode cqCodeImage = CQCodeUtil.build().getCQCode_Image(pic.getAbsolutePath());
-                        String message = cqCodeImage.toString() + "\n" +
+                        String message = cqCodeImage + "\n" +
                                 p.getTitle() + "\n" +
                                 ARTWORK_PREFIX + p.getArtwork() + "\n" +
                                 p.getAuthor() + "\n" +

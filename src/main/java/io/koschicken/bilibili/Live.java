@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.client.fluent.Request;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,12 +11,10 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static io.koschicken.constants.Constants.COMMON_CONFIG;
 import static org.springframework.util.ResourceUtils.isUrl;
 
 public class Live {
-
-    @Value("${bilibili.cookie}")
-    private static String COOKIE;
 
     private static final String TEMP = "./temp/bili/Live/";
     private final String mid;//主播uid
@@ -62,7 +59,7 @@ public class Live {
     public static String get(String getUrl) throws IOException {
         return Request.Get(getUrl)
                 .setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:80.0) Gecko/20100101 Firefox/80.0")
-                .setHeader("Cookie", COOKIE)
+                .setHeader("Cookie", COMMON_CONFIG.getBilibiliCookie())
                 .execute().returnContent().asString();
     }
 
@@ -86,13 +83,13 @@ public class Live {
             boolean isUrl = isUrl(coverFromJson);
             if (isUrl) {
                 String fileName = getImageName(coverFromJson);
-                if (this.cover == null || this.cover.getName().equals(fileName)) {
-                    this.cover = new File(TEMP + fileName);
-                    FileUtils.forceMkdir(this.cover.getParentFile());
-                    FileUtils.deleteQuietly(this.cover);
-                    FileUtils.touch(this.cover);
+                if (cover == null || cover.getName().equals(fileName)) {
+                    cover = new File(TEMP + fileName);
+                    FileUtils.forceMkdir(cover.getParentFile());
+                    FileUtils.deleteQuietly(cover);
+                    FileUtils.touch(cover);
                     URL imageUrl = new URL(coverFromJson);
-                    FileUtils.copyURLToFile(imageUrl, this.cover);
+                    FileUtils.copyURLToFile(imageUrl, cover);
                 }
             }
         }

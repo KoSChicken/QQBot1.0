@@ -9,22 +9,38 @@ import java.io.Serializable;
 @TableName("scores")
 public class Scores implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 3424842641174723836L;
 
     @TableId(value = "qq")
-    private Long qq;
+    private String qq;
+
+    private String nickname;
+
     @TableField(value = "sign_flag")
     private Boolean signFlag;
-    private Integer score;
-    @TableField(value = "group_code")
-    private String groupCode;
 
-    public Long getQq() {
+    private Integer score;
+
+    @TableField(value = "live_flag")
+    private Boolean liveFlag;
+
+    @TableField(value = "roll_count")
+    private Integer rollCount;
+
+    public String getQq() {
         return qq;
     }
 
-    public void setQq(Long qq) {
+    public void setQq(String qq) {
         this.qq = qq;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public Boolean getSignFlag() {
@@ -43,21 +59,31 @@ public class Scores implements Serializable {
         this.score = score;
     }
 
-    public String getGroupCode() {
-        return groupCode;
+    public Boolean getLiveFlag() {
+        return liveFlag;
     }
 
-    public void setGroupCode(String groupCode) {
-        this.groupCode = groupCode;
+    public void setLiveFlag(Boolean liveFlag) {
+        this.liveFlag = liveFlag;
+    }
+
+    public Integer getRollCount() {
+        return rollCount;
+    }
+
+    public void setRollCount(Integer rollCount) {
+        this.rollCount = rollCount;
     }
 
     @Override
     public String toString() {
         return "Scores{" +
-                "qq=" + qq +
+                "qq='" + qq + '\'' +
+                ", nickname='" + nickname + '\'' +
                 ", signFlag=" + signFlag +
                 ", score=" + score +
-                ", groupCode='" + groupCode + '\'' +
+                ", liveFlag=" + liveFlag +
+                ", rollCount=" + rollCount +
                 '}';
     }
 }

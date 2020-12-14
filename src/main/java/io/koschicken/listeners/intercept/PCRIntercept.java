@@ -9,25 +9,27 @@ import io.koschicken.constants.Constants;
 import io.koschicken.utils.JSONUtils;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-
 
 @Beans
 public class PCRIntercept implements MsgIntercept {
-    public static Map<String, GroupPower> groupConfigMap = new ConcurrentHashMap<>(10);//1:总开关2:抽卡开关3：提醒买药开关
-    //默认总开关开启
+
+    public static Map<String, GroupPower> GROUP_CONFIG_MAP = new ConcurrentHashMap<>(10);
 
     @Override
     public boolean intercept(MsgGetContext context) {
         if (context.getMsgGet() instanceof GroupMsg) {
             try {
                 //总体开关
-                if (!(groupConfigMap.get(((GroupMsg) context.getMsgGet()).getGroupCode())).isGlobalSwitch()) {
-                    return isOpen(context.getMsgGet().getMsg());
+                if (!(GROUP_CONFIG_MAP.get(((GroupMsg) context.getMsgGet()).getGroupCode())).isGlobalSwitch()) {
+                    String masterQQ = Constants.COMMON_CONFIG.getMasterQQ();
+                    String qq = ((GroupMsg) context.getMsgGet()).getQQ();
+                    return isOpen(context.getMsgGet().getMsg()) && Objects.equals(masterQQ, qq);
                 }
                 //抽卡消息过滤
                 if (isChouKa(context.getMsgGet().getMsg())) {
-                    return groupConfigMap.get(((GroupMsg) context.getMsgGet()).getGroupCode()).isGachaSwitch();
+                    return GROUP_CONFIG_MAP.get(((GroupMsg) context.getMsgGet()).getGroupCode()).isGachaSwitch();
                 }
             } catch (NullPointerException e) {
                 //没这个群的信息
@@ -36,8 +38,8 @@ public class PCRIntercept implements MsgIntercept {
                 groupPower.setMaiyaoSwitch(Constants.COMMON_CONFIG.isMaiyaoSwitch());
                 groupPower.setGachaSwitch(Constants.COMMON_CONFIG.isGachaSwitch());
                 groupPower.setHorseSwitch(Constants.COMMON_CONFIG.isHorseSwitch());
-                groupConfigMap.put(((GroupMsg) context.getMsgGet()).getGroupCode(), groupPower);
-                JSONUtils.setJson(groupConfigMap);
+                GROUP_CONFIG_MAP.put(((GroupMsg) context.getMsgGet()).getGroupCode(), groupPower);
+                JSONUtils.setJson(GROUP_CONFIG_MAP);
                 return Constants.COMMON_CONFIG.isGlobalSwitch();
             }
         }
@@ -51,6 +53,6 @@ public class PCRIntercept implements MsgIntercept {
     }
 
     public boolean isOpen(String msg) {
-        return "#开启PcrTool".equals(msg);
+        return "#启用Bot".equals(msg);
     }
 }

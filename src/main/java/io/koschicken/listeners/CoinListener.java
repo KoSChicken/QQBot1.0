@@ -3,12 +3,16 @@ package io.koschicken.listeners;
 import com.forte.qqrobot.anno.Filter;
 import com.forte.qqrobot.anno.Listen;
 import com.forte.qqrobot.beans.messages.msgget.GroupMsg;
+import com.forte.qqrobot.beans.messages.result.GroupMemberInfo;
 import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
 import com.forte.qqrobot.beans.types.KeywordMatchType;
-import com.forte.qqrobot.bot.BotManager;
 import com.forte.qqrobot.sender.MsgSender;
 import io.koschicken.constants.Constants;
+import io.koschicken.database.bean.Lucky;
+import io.koschicken.database.bean.QQGroup;
 import io.koschicken.database.bean.Scores;
+import io.koschicken.database.service.LuckyService;
+import io.koschicken.database.service.QQGroupService;
 import io.koschicken.database.service.ScoresService;
 import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
@@ -16,25 +20,65 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
 public class CoinListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CoinListener.class);
     public static final int SIGN_SCORE = 5000;
+    private static final Logger LOGGER = LoggerFactory.getLogger(CoinListener.class);
 
     @Autowired
     ScoresService scoresService;
 
     @Autowired
-    private BotManager botManager;
+    QQGroupService qqGroupService;
+
+    @Autowired
+    LuckyService luckyService;
 
     @Listen(MsgGetTypes.groupMsg)
-    @Filter(value = {"签到", "#签到", "簽到", "#簽到"}, keywordMatchType = KeywordMatchType.TRIM_EQUALS)
+    @Filter(value = {"签到", "簽到"}, keywordMatchType = KeywordMatchType.TRIM_EQUALS)
     public void sign(GroupMsg msg, MsgSender sender) {
+        String qq = msg.getQQ();
+        String groupCode = msg.getGroupCode();
         int rank = RandomUtils.nextInt(1, 101);
+        int score = getScore(rank);
+        Scores scores = scoresService.getById(qq);
+        if (scores != null) {
+            if (Boolean.TRUE.equals(scores.getSignFlag())) {
+                sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "] 每天只能签到一次");
+                return;
+            }
+            scores.setScore(scores.getScore() + score);
+            scores.setSignFlag(true);
+            scoresService.updateById(scores);
+            QQGroup group = qqGroupService.findOne(qq, groupCode);
+            if (Objects.isNull(group)) {
+                qqGroupService.save(new QQGroup(qq, groupCode));
+            }
+            String message;
+            if (score > 15) {
+                message = Constants.CQ_AT + qq + "] 签到成功，币+" + score + "，现在币:" + scores.getScore();
+            } else {
+                message = Constants.CQ_AT + qq + "] 天选之人！币+" + score + "，现在币:" + scores.getScore();
+            }
+            sender.SENDER.sendGroupMsg(groupCode, message);
+        } else {
+            scores = new Scores();
+            scores.setQq(qq);
+            scores.setSignFlag(true);
+            scores.setScore(SIGN_SCORE); // 第一次签到的仍然是5000
+            scoresService.save(scores);
+            qqGroupService.save(new QQGroup(qq, groupCode));
+            sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "] 签到成功，币+" + score);
+        }
+    }
+
+    private int getScore(int rank) {
         int score;
         if (rank >= 99) {
             score = RandomUtils.nextInt(25000, 50001);
@@ -47,35 +91,58 @@ public class CoinListener {
         } else {
             score = rank;
         }
-        Scores scores = scoresService.getById(msg.getCodeNumber());
+        return score;
+    }
+
+    @Listen(MsgGetTypes.groupMsg)
+    @Filter(value = {"我有多少钱", "余额"}, keywordMatchType = KeywordMatchType.TRIM_EQUALS)
+    public void myCoin(GroupMsg msg, MsgSender sender) {
+        String qq = msg.getQQ();
+        Scores scores = scoresService.getById(qq);
+        String groupCode = msg.getGroupCode();
         if (scores != null) {
-            if (Boolean.TRUE.equals(scores.getSignFlag())) {
-                sender.SENDER.sendGroupMsg(msg.getGroupCode(), Constants.CQ_AT + msg.getQQ() + "] 每天只能签到一次");
-                return;
-            }
-            scores.setScore(scores.getScore() + score);
-            scores.setSignFlag(true);
-            String groupCode = scores.getGroupCode();
-            if (groupCode != null && !groupCode.contains(msg.getGroupCode())) {
-                scores.setGroupCode(groupCode + ", " + msg.getGroupCode());
+            String isSign = Boolean.TRUE.equals(scores.getSignFlag()) ? "" : "，还没有签到";
+            if (scores.getScore() > 0) {
+                sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + msg.getQQ() + "] 有" + scores.getScore() + "块钱" + isSign);
             } else {
-                scores.setGroupCode(msg.getGroupCode());
-            }
-            scoresService.updateById(scores);
-            if (score > 15) {
-                sender.SENDER.sendGroupMsg(msg.getGroupCode(), Constants.CQ_AT + msg.getQQ() + "] 签到成功，币+" + score + "，现在币:" + scores.getScore());
-            } else {
-                sender.SENDER.sendGroupMsg(msg.getGroupCode(), Constants.CQ_AT + msg.getQQ() + "] 天选之人！币+" + score + "，现在币:" + scores.getScore());
+                sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + msg.getQQ() + "] 你没钱，穷仔" + isSign);
             }
         } else {
-            scores = new Scores();
-            scores.setQq(msg.getCodeNumber());
-            scores.setSignFlag(true);
-            scores.setScore(SIGN_SCORE); // 第一次签到的仍然是5000
-            scores.setGroupCode(msg.getGroupCode());
-            scoresService.save(scores);
-            sender.SENDER.sendGroupMsg(msg.getGroupCode(), Constants.CQ_AT + msg.getQQ() + "] 签到成功，币+" + score);
+            sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + msg.getQQCode() + "] 冇");
         }
+    }
+
+    @Listen(MsgGetTypes.groupMsg)
+    @Filter(value = "#财富榜")
+    public void rank(GroupMsg msg, MsgSender sender) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("群友财富榜\n");
+        List<Scores> list = scoresService.rank("%" + msg.getGroupCode() + "%");
+        for (int i = 0; i < list.size(); i++) {
+            GroupMemberInfo info = sender.GETTER.getGroupMemberInfo(msg.getGroupCode(), String.valueOf(list.get(i).getQq()));
+            sb.append(i + 1).append(". ").append(dealCard(info.getCard())).append(" 余额：").append(list.get(i).getScore()).append("\n");
+        }
+        sender.SENDER.sendGroupMsg(msg.getGroupCode(), sb.toString().trim());
+    }
+
+    @Listen(MsgGetTypes.groupMsg)
+    @Filter(value = "#天选")
+    public void luckyList(GroupMsg msg, MsgSender sender) {
+        String groupCode = msg.getGroupCode();
+        StringBuilder sb = new StringBuilder();
+        sb.append("天选之人榜\n");
+        List<Lucky> list = luckyService.listByGroupCode(groupCode);
+        for (int i = 0; i < 10; i++) {
+            Lucky lucky = list.get(i);
+            GroupMemberInfo info = sender.GETTER.getGroupMemberInfo(msg.getGroupCode(), String.valueOf(lucky.getQq()));
+            sb.append(i + 1).append(". ").append(dealCard(info.getCard())).append(" 天选次数：").append(lucky.getCount()).append("\n");
+        }
+        sb.append("等").append(list.size()).append("位群友");
+        sender.SENDER.sendGroupMsg(msg.getGroupCode(), sb.toString().trim());
+    }
+
+    private String dealCard(String card) {
+        return card.replace("怪物猎人辱华", "屏蔽字");
     }
 
     @Listen(MsgGetTypes.groupMsg)
@@ -99,7 +166,7 @@ public class CoinListener {
                 sender.SENDER.sendGroupMsg(msg.getGroupCode(), "没有金融危机袭击的目标");
                 return;
             }
-            scoresService.financialCrisis(Long.parseLong(target));
+            scoresService.financialCrisis(target);
             sender.SENDER.sendGroupMsg(msg.getGroupCode(), Constants.CQ_AT + target + "] 遭遇金融危机，财产减半。");
         }
     }
@@ -124,7 +191,7 @@ public class CoinListener {
                 sender.SENDER.sendGroupMsg(msg.getGroupCode(), "退款数值不能为负数");
                 return;
             }
-            scoresService.refundWu(Long.parseLong(msg.getQQCode()), refund);
+            scoresService.refundWu(msg.getQQ(), refund);
             sender.SENDER.sendGroupMsg(msg.getGroupCode(), "恭喜你，成功退款，快查查余额吧 :)");
         }
     }

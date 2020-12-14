@@ -1,8 +1,8 @@
 package io.koschicken.database.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.koschicken.database.bean.Scores;
+import io.koschicken.database.dao.QQGroupMapper;
 import io.koschicken.database.dao.ScoresMapper;
 import io.koschicken.database.service.ScoresService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,55 +12,39 @@ import java.util.List;
 
 @Service
 public class ScoresServiceImpl extends ServiceImpl<ScoresMapper, Scores> implements ScoresService {
+
     @Autowired
     ScoresMapper scoresMapper;
 
+    @Autowired
+    QQGroupMapper qqGroupMapper;
+
     @Override
     public void clearSign() {
-        scoresMapper.changeTeamSum();
+        scoresMapper.clearSign();
     }
 
     @Override
-    public Boolean selectSign(long qq) {
+    public void clearRoll() {
+        scoresMapper.clearRoll();
+    }
+
+    @Override
+    public Boolean selectSign(String qq) {
         return scoresMapper.selectSign(qq);
     }
 
     @Override
-    public void sign(long qq) {
+    public void sign(String qq) {
         scoresMapper.sign(qq);
     }
 
     @Override
-    public int setLive(long qq, String live) {
-        QueryWrapper<Scores> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("QQ", qq);
-        Scores scores = scoresMapper.selectOne(queryWrapper);
-        if (scores == null) {
-            scores = new Scores();
-            scores.setQq(qq);
-            scores.setScore(1);
-            scores.setSignFlag(false);
-            scoresMapper.insert(scores);
-        }
-        return -1;
-    }
-
-    @Override
-    public int clearLive(long qq, String size) {
-        return scoresMapper.clear(qq, size);
-    }
-
-    @Override
-    public List<Scores> getLive() {
-        return scoresMapper.selectlive();
-    }
-
-    @Override
-    public int updateLiveOn(long qq, boolean on) {
+    public int updateLiveOn(String qq, boolean on) {
         if (on) {
-            return scoresMapper.openlive(qq);
+            return scoresMapper.openLive(qq);
         } else {
-            return scoresMapper.closelive(qq);
+            return scoresMapper.closeLive(qq);
         }
     }
 
@@ -70,12 +54,12 @@ public class ScoresServiceImpl extends ServiceImpl<ScoresMapper, Scores> impleme
     }
 
     @Override
-    public void financialCrisis(long qq) {
+    public void financialCrisis(String qq) {
         scoresMapper.financialCrisis(qq);
     }
 
     @Override
-    public void refundWu(long qq, Integer refund) {
+    public void refundWu(String qq, Integer refund) {
         scoresMapper.refundWu(qq, refund);
     }
 
@@ -86,11 +70,6 @@ public class ScoresServiceImpl extends ServiceImpl<ScoresMapper, Scores> impleme
 
     @Override
     public List<Scores> rank(String groupCode) {
-        return scoresMapper.rank(groupCode);
-    }
-
-    @Override
-    public List<String> groupCodeByMid(String mid) {
-        return scoresMapper.groupCodeByMid(mid);
+        return qqGroupMapper.rank(groupCode);
     }
 }

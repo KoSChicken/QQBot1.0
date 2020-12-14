@@ -12,7 +12,7 @@ import static io.koschicken.constants.Constants.CONFIG_DIR;
 
 public class JSONUtils {
 
-    private JSONUtils(){
+    private JSONUtils() {
     }
 
     public static synchronized void setJson(Map<String, GroupPower> map) {

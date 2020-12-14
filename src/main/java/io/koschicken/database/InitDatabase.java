@@ -32,16 +32,18 @@ public class InitDatabase {
                 e.printStackTrace();
             }
         }
-
     }
 
     public void createDatabase(int version, Connection conn) {
         try (Statement statement = conn.createStatement()) {
-            if (version == -1) {//没有数据库版本标识，重新建立数据库
-                statement.executeUpdate("create table scores(qq integer primary key, nickname varchar(50), sign_flag boolean default false, score integer(8) default 0, group_code text)");
+            if (version == -1) {
+                //没有数据库版本标识，重新建立数据库
                 statement.executeUpdate("create table 'version'('version' integer)");
                 statement.executeUpdate("insert into version values (" + NEW_VERSION + ")");
                 statement.executeUpdate("create table pic(pid integer primary key, last_send_time datetime)");
+                statement.executeUpdate("create table scores(qq varchar(15) primary key, nickname varchar(50), sign_flag boolean default false, score integer default 0)");
+                statement.executeUpdate("create table `group`(id integer not null constraint group_pk primary key autoincrement, qq varchar(15) not null, `group` varchar(15) not null)");
+                statement.executeUpdate("create table live (id integer not null constraint live_pk primary key autoincrement, qq varchar(15) not null, bili_uid varchar(15) not null)");
             }
         } catch (SQLException e) {
             e.printStackTrace();

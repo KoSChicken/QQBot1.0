@@ -1,5 +1,6 @@
 package io.koschicken;
 
+import io.koschicken.constants.Constants;
 import io.koschicken.database.InitDatabase;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -22,12 +23,12 @@ public class Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) {
-        // 检查Bot配置，主要是用户名和密码
-        checkBotConfig();
         // 初始化数据库文件
         InitDatabase initDatabase = new InitDatabase();
         initDatabase.initDB();
         InitConfig.initConfigs();
+        // 检查Bot配置，主要是用户名和密码
+        checkBotConfig();
         // 启动
         SpringApplication.run(Application.class, args);
     }
@@ -62,7 +63,7 @@ public class Application {
         LOGGER.info("密码:  ");
         String path = scanner.next();
         URL url = Application.class.getClassLoader().getResource("application.properties");
-        try (OutputStream fos = new FileOutputStream(Objects.requireNonNull(url).getFile())){
+        try (OutputStream fos = new FileOutputStream(Objects.requireNonNull(url).getFile())) {
             properties.setProperty("simbot.core.bots", code + ":" + path);
             properties.store(fos, "bot的账号和密码");
         } catch (IOException e) {
@@ -71,12 +72,15 @@ public class Application {
     }
 
     private static void writeBilibiliCookie(Properties properties) {
-        Scanner scanner = new Scanner(System.in);
-        LOGGER.info("未检测到 B 站 Cookie，会导致 B 站 API 无法调用，请填写（Enter 键跳过）：");
-        String cookie = scanner.nextLine();
+        String bilibiliCookie = Constants.COMMON_CONFIG.getBilibiliCookie();
+        if (StringUtils.isEmpty(bilibiliCookie)) {
+            Scanner scanner = new Scanner(System.in);
+            LOGGER.info("未检测到 B 站 Cookie，会导致 B 站 API 无法调用，请填写（Enter 键跳过，可在通用配置.txt中手动添加）：");
+            bilibiliCookie = scanner.nextLine();
+        }
         URL url = Application.class.getClassLoader().getResource("application.properties");
-        try (OutputStream fos = new FileOutputStream(Objects.requireNonNull(url).getFile())){
-            properties.setProperty("bilibili.cookie", cookie);
+        try (OutputStream fos = new FileOutputStream(Objects.requireNonNull(url).getFile())) {
+            properties.setProperty("bilibili.cookie", bilibiliCookie);
             properties.store(fos, "B 站 Cookie，用于调用 B 站 API");
         } catch (IOException e) {
             e.printStackTrace();
@@ -84,12 +88,15 @@ public class Application {
     }
 
     private static void writeLoliconApiKey(Properties properties) {
-        Scanner scanner = new Scanner(System.in);
-        LOGGER.info("未检测到 LoliconAPIKey，会导致 API 无法调用，请填写（Enter 键跳过）：");
-        String apiKey = scanner.nextLine();
+        String loliconApiKey = Constants.COMMON_CONFIG.getLoliconApiKey();
+        if (StringUtils.isEmpty(loliconApiKey)) {
+            Scanner scanner = new Scanner(System.in);
+            LOGGER.info("未检测到 LoliconAPIKey，会导致 API 无法调用，请填写（Enter 键跳过，可在通用配置.txt中手动添加）：");
+            loliconApiKey = scanner.nextLine();
+        }
         URL url = Application.class.getClassLoader().getResource("application.properties");
-        try (OutputStream fos = new FileOutputStream(Objects.requireNonNull(url).getFile())){
-            properties.setProperty("lolicon.apiKey", apiKey);
+        try (OutputStream fos = new FileOutputStream(Objects.requireNonNull(url).getFile())) {
+            properties.setProperty("lolicon.apiKey", loliconApiKey);
             properties.store(fos, "Lolicon 的 APIKey，用于调用 setuAPI");
         } catch (IOException e) {
             e.printStackTrace();

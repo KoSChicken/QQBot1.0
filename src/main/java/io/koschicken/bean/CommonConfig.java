@@ -23,6 +23,10 @@ public class CommonConfig {
     private int setuCoin;
     //r18图片的私聊开关
     private boolean r18Private;
+    //LoliconApiKey
+    private String loliconApiKey;
+    //B站cookie
+    private String bilibiliCookie;
 
     public CommonConfig() {
     }
@@ -131,6 +135,22 @@ public class CommonConfig {
         this.r18Private = r18Private;
     }
 
+    public String getLoliconApiKey() {
+        return loliconApiKey;
+    }
+
+    public void setLoliconApiKey(String loliconApiKey) {
+        this.loliconApiKey = loliconApiKey;
+    }
+
+    public String getBilibiliCookie() {
+        return bilibiliCookie;
+    }
+
+    public void setBilibiliCookie(String bilibiliCookie) {
+        this.bilibiliCookie = bilibiliCookie;
+    }
+
     @Override
     public String toString() {
         return "CommonConfig{" +
@@ -145,6 +165,8 @@ public class CommonConfig {
                 ", signCoin=" + signCoin +
                 ", setuCoin=" + setuCoin +
                 ", r18Private=" + r18Private +
+                ", loliconApiKey='" + loliconApiKey + '\'' +
+                ", bilibiliCookie='" + bilibiliCookie + '\'' +
                 '}';
     }
 }

@@ -20,14 +20,14 @@ import java.util.Set;
 
 import static io.koschicken.constants.Constants.CONFIG_DIR;
 import static io.koschicken.constants.PCRConstants.*;
-import static io.koschicken.listeners.intercept.PCRIntercept.groupConfigMap;
+import static io.koschicken.listeners.intercept.PCRIntercept.GROUP_CONFIG_MAP;
 
 public class InitConfig {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(InitConfig.class);
+
     private InitConfig() {
     }
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(InitConfig.class);
 
     public static void initConfigs() {
         //读取配置文件
@@ -58,7 +58,7 @@ public class InitConfig {
                 for (String s : keySet) {
                     String string = jsonObject.getJSONObject(s).toJSONString();
                     GroupPower keyValues = JSON.parseObject(string, GroupPower.class);
-                    groupConfigMap.put(s, keyValues);
+                    GROUP_CONFIG_MAP.put(s, keyValues);
                 }
             } catch (IOException | NullPointerException e) {
                 e.printStackTrace();
@@ -108,6 +108,10 @@ public class InitConfig {
         pro.setProperty("发一次色图花费", "1000");
         pro.addComment("r18私聊开关");
         pro.setProperty("r18私聊", "true");
+        pro.addComment("LoliconAPIKey");
+        pro.setProperty("LOLICON_API_KEY", "");
+        pro.addComment("B站Cookie");
+        pro.setProperty("bilibiliCookie", "");
         pro.store(outputStream, "通用配置");
         outputStream.close();
     }
@@ -129,6 +133,8 @@ public class InitConfig {
         commonConfig.setSignCoin(Integer.parseInt(pro.getProperty("签到一次金币")));
         commonConfig.setSetuCoin(Integer.parseInt(pro.getProperty("发一次色图花费")));
         commonConfig.setR18Private(Boolean.parseBoolean(pro.getProperty("r18私聊")));
+        commonConfig.setLoliconApiKey(pro.getProperty("LOLICON_API_KEY"));
+        commonConfig.setBilibiliCookie(pro.getProperty("bilibiliCookie"));
         in.close();
         return commonConfig;
     }

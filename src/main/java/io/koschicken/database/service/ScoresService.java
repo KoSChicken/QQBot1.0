@@ -9,30 +9,21 @@ public interface ScoresService extends IService<Scores> {
 
     void clearSign();
 
-    Boolean selectSign(long qq);
+    void clearRoll();
 
-    void sign(long qq);
+    Boolean selectSign(String qq);
 
-    //设置一个直播记录，返回设置的槽位，满了返回-1
-    int setLive(long qq, String live);
+    void sign(String qq);
 
-    //清除指定位置的直播记录
-    int clearLive(long qq, String size);
-
-    //获取数据库中开启直播监听的人的数据
-    List<Scores> getLive();
-
-    int updateLiveOn(long qq, boolean on);
+    int updateLiveOn(String qq, boolean on);
 
     void allRich();
 
-    void financialCrisis(long qq);
+    void financialCrisis(String qq);
 
-    void refundWu(long qq, Integer refund);
+    void refundWu(String qq, Integer refund);
 
     Long findQQByNickname(String nickname);
 
     List<Scores> rank(String groupCode);
-
-    List<String> groupCodeByMid(String mid);
 }

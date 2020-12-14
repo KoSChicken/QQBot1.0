@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 public class SetuUtils {
     private static final String YUBAN1073API = "http://api.yuban10703.xyz:2333/setu_v3";
     private static final String LOLICONAPI = "https://api.lolicon.app/setu/";

@@ -3,11 +3,7 @@ package io.koschicken.listeners.game;
 import com.forte.qqrobot.anno.Filter;
 import com.forte.qqrobot.anno.Listen;
 import com.forte.qqrobot.beans.messages.msgget.GroupMsg;
-import com.forte.qqrobot.beans.messages.msgget.MsgGet;
-import com.forte.qqrobot.beans.messages.msgget.PrivateMsg;
-import com.forte.qqrobot.beans.messages.result.GroupMemberInfo;
 import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
-import com.forte.qqrobot.beans.types.KeywordMatchType;
 import com.forte.qqrobot.bot.BotManager;
 import com.forte.qqrobot.bot.BotSender;
 import com.forte.qqrobot.sender.MsgSender;
@@ -122,52 +118,6 @@ public class HorseListener {
         if (size > 4) {
             start(msg, sender);
         }
-    }
-
-    @Listen(value = {MsgGetTypes.groupMsg, MsgGetTypes.privateMsg})
-    @Filter(value = "我有多少钱", keywordMatchType = KeywordMatchType.TRIM_EQUALS)
-    public void myCoin(MsgGet msg, MsgSender sender) {
-        Scores scores;
-        GroupMsg groupMsg;
-        PrivateMsg privateMsg;
-        if (msg instanceof GroupMsg) {
-            groupMsg = (GroupMsg) msg;
-            scores = scoresService.getById(groupMsg.getCodeNumber());
-            if (scores != null) {
-                String isSign = Boolean.TRUE.equals(scores.getSignFlag()) ? "" : "，还没有签到哦";
-                if (scores.getScore() > 0) {
-                    sender.SENDER.sendGroupMsg(groupMsg.getGroupCode(), Constants.CQ_AT + groupMsg.getQQ() + "] 有"
-                            + scores.getScore() + "块钱" + isSign);
-                } else {
-                    sender.SENDER.sendGroupMsg(groupMsg.getGroupCode(), Constants.CQ_AT + groupMsg.getQQ() + "] 你没钱，穷仔" + isSign);
-                }
-            } else {
-                sender.SENDER.sendGroupMsg(groupMsg.getGroupCode(),
-                        Constants.CQ_AT + groupMsg.getQQCode() + "] 锅里没有一滴油");
-            }
-        } else {
-            privateMsg = (PrivateMsg) msg;
-            scores = scoresService.getById(privateMsg.getCodeNumber());
-            if (scores != null) {
-                String isSign = Boolean.TRUE.equals(scores.getSignFlag()) ? "" : "，还没有签到哦";
-                sender.SENDER.sendPrivateMsg(privateMsg.getQQCode(), "有" + scores.getScore() + "块钱" + isSign);
-            } else {
-                sender.SENDER.sendPrivateMsg(privateMsg.getQQCode(), "锅里没有一滴油");
-            }
-        }
-    }
-
-    @Listen(MsgGetTypes.groupMsg)
-    @Filter(value = {"#财富榜.*"}, at = true)
-    public void rank(GroupMsg msg, MsgSender sender) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("群友财富榜\n");
-        List<Scores> list = scoresService.rank("%" + msg.getGroupCode() + "%");
-        for (int i = 0; i < list.size(); i++) {
-            GroupMemberInfo info = sender.GETTER.getGroupMemberInfo(msg.getGroupCode(), String.valueOf(list.get(i).getQq()));
-            sb.append(i + 1).append(". ").append(info.getCard()).append(" 余额：").append(list.get(i).getScore()).append("\n");
-        }
-        sender.SENDER.sendGroupMsg(msg.getGroupCode(), sb.toString().trim());
     }
 
     /**

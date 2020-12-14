@@ -6,15 +6,14 @@ import java.util.Map;
 //bv号转av号工具
 public class BVAVUtils {
 
-    private BVAVUtils() {
-    }
-
     private static final String TABLE = "fZodR9XQDSUm21yCkr6zBqiveYah8bt4xsWpHnJE7jL5VG3guMTKNPAwcF";
     private static final Map<String, Integer> mp = new HashMap<>();
     private static final Map<Integer, String> mp2 = new HashMap<>();
     static int[] ss = {11, 10, 3, 8, 4, 6, 2, 9, 5, 7};
     static long xor = 177451812;
     static long add = 8728348608L;
+    private BVAVUtils() {
+    }
 
     public static long power(int a, int b) {
         long power = 1;

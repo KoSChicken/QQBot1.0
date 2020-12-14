@@ -5,55 +5,61 @@ public class GroupPower {
     private boolean gachaSwitch;//扭蛋开关
     private boolean maiyaoSwitch;//买药小助手提示
     private boolean horseSwitch;//赛马开关
-    private boolean setuSwitch;
-    private boolean diceSwitch;
+    private boolean setuSwitch;//涩图开关
+    private boolean diceSwitch;//骰子开关
 
     public boolean isGlobalSwitch() {
         return globalSwitch;
     }
 
-    public void setGlobalSwitch(boolean globalSwitch) {
+    public GroupPower setGlobalSwitch(boolean globalSwitch) {
         this.globalSwitch = globalSwitch;
+        return this;
     }
 
     public boolean isGachaSwitch() {
         return gachaSwitch;
     }
 
-    public void setGachaSwitch(boolean gachaSwitch) {
+    public GroupPower setGachaSwitch(boolean gachaSwitch) {
         this.gachaSwitch = gachaSwitch;
+        return this;
     }
 
     public boolean isMaiyaoSwitch() {
         return maiyaoSwitch;
     }
 
-    public void setMaiyaoSwitch(boolean maiyaoSwitch) {
+    public GroupPower setMaiyaoSwitch(boolean maiyaoSwitch) {
         this.maiyaoSwitch = maiyaoSwitch;
+        return this;
     }
 
     public boolean isHorseSwitch() {
         return horseSwitch;
     }
 
-    public void setHorseSwitch(boolean horseSwitch) {
+    public GroupPower setHorseSwitch(boolean horseSwitch) {
         this.horseSwitch = horseSwitch;
+        return this;
     }
 
     public boolean isSetuSwitch() {
         return setuSwitch;
     }
 
-    public void setSetuSwitch(boolean setuSwitch) {
+    public GroupPower setSetuSwitch(boolean setuSwitch) {
         this.setuSwitch = setuSwitch;
+        return this;
     }
 
     public boolean isDiceSwitch() {
         return diceSwitch;
     }
 
-    public void setDiceSwitch(boolean diceSwitch) {
+    public GroupPower setDiceSwitch(boolean diceSwitch) {
         this.diceSwitch = diceSwitch;
+        return this;
     }
 
     @Override
