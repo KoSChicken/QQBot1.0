@@ -17,7 +17,7 @@ public class QQGroup implements Serializable {
 
     private String qq;
 
-    @TableField(value = "group")
+    @TableField(value = "group_code")
     private String groupCode;
 
     public QQGroup(String qq, String group) {

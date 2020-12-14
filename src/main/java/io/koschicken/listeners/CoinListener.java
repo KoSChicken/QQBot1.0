@@ -117,7 +117,7 @@ public class CoinListener {
     public void rank(GroupMsg msg, MsgSender sender) {
         StringBuilder sb = new StringBuilder();
         sb.append("群友财富榜\n");
-        List<Scores> list = scoresService.rank("%" + msg.getGroupCode() + "%");
+        List<Scores> list = scoresService.rank(msg.getGroupCode());
         for (int i = 0; i < list.size(); i++) {
             GroupMemberInfo info = sender.GETTER.getGroupMemberInfo(msg.getGroupCode(), String.valueOf(list.get(i).getQq()));
             sb.append(i + 1).append(". ").append(dealCard(info.getCard())).append(" 余额：").append(list.get(i).getScore()).append("\n");
@@ -132,7 +132,7 @@ public class CoinListener {
         StringBuilder sb = new StringBuilder();
         sb.append("天选之人榜\n");
         List<Lucky> list = luckyService.listByGroupCode(groupCode);
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < (Math.min(list.size(), 10)); i++) {
             Lucky lucky = list.get(i);
             GroupMemberInfo info = sender.GETTER.getGroupMemberInfo(msg.getGroupCode(), String.valueOf(lucky.getQq()));
             sb.append(i + 1).append(". ").append(dealCard(info.getCard())).append(" 天选次数：").append(lucky.getCount()).append("\n");
