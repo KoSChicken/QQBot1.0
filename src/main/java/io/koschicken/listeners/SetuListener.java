@@ -13,6 +13,7 @@ import io.koschicken.database.service.ScoresService;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +23,14 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,6 +43,10 @@ public class SetuListener {
     private static final String ARTWORK_PREFIX = "https://www.pixiv.net/artworks/";
     private static final String ARTIST_PREFIX = "https://www.pixiv.net/users/";
     private static final String AVATAR_API = "http://thirdqq.qlogo.cn/g?b=qq&nk=";
+    private static final String AWSL = "https://setu.awsl.ee/api/setu!";
+    private static final String MJX = "https://api.66mz8.com/api/rand.tbimg.php?format=pic";
+    private static final String UA = "User-Agent";
+    private static final String UA_STRING = "Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3";
     private static final int CD = 20;
     private static final String CQ_AT = "[CQ:at,qq=";
     private static final HashMap<String, Integer> NUMBER;
@@ -126,6 +135,41 @@ public class SetuListener {
         }
     }
 
+    @Listen(MsgGetTypes.groupMsg)
+    @Filter(value = "#awsl")
+    public void awsl(GroupMsg msg, MsgSender sender) throws IOException {
+        String groupCode = msg.getGroupCode();
+        if (isCool(msg.getQQ(), groupCode)) {
+            HttpResponse httpResponse = Request.Get(AWSL).addHeader(UA, UA_STRING).execute().returnResponse();
+            InputStream content = httpResponse.getEntity().getContent();
+            String uuid = UUID.randomUUID().toString();
+            Path path = Paths.get(TEMP + uuid + ".jpg");
+            Files.copy(content, path);
+            CQCode cqCodeImage = CQCodeUtil.build().getCQCode_Image(path.toAbsolutePath().toString());
+            sender.SENDER.sendGroupMsg(groupCode, cqCodeImage.toString());
+        } else {
+            sender.SENDER.sendGroupMsg(groupCode, "CD中...");
+        }
+    }
+
+    @Listen(MsgGetTypes.groupMsg)
+    @Filter(value = "#mjx")
+    public void mjx(GroupMsg msg, MsgSender sender) throws IOException {
+        String groupCode = msg.getGroupCode();
+        if (isCool(msg.getQQ(), groupCode)) {
+            InputStream content = Request.Get(MJX)
+                    .setHeader(UA, UA_STRING)
+                    .execute().returnResponse().getEntity().getContent();
+            String uuid = UUID.randomUUID().toString();
+            Path path = Paths.get(TEMP + uuid + ".jpg");
+            Files.copy(content, path);
+            CQCode cqCodeImage = CQCodeUtil.build().getCQCode_Image(path.toAbsolutePath().toString());
+            sender.SENDER.sendGroupMsg(groupCode, cqCodeImage.toString());
+        } else {
+            sender.SENDER.sendGroupMsg(groupCode, "CD中...");
+        }
+    }
+
     private void createScore(GroupMsg msg, MsgSender sender) {
         Scores scores = new Scores();
         scores.setSignFlag(false);
@@ -170,16 +214,16 @@ public class SetuListener {
     /**
      * 获取冷却时间是不是到了
      *
-     * @param QQ
+     * @param qq
      */
-    private boolean isCool(String QQ, String groupCode) {
+    private boolean isCool(String qq, String groupCode) {
         if (coolDown == null) {
             coolDown = new HashMap<>();
             return true;
         } else {
             HashMap<String, LocalDateTime> hashMap = coolDown.get(groupCode);
             if (hashMap != null) {
-                LocalDateTime localDateTime = hashMap.get(QQ);
+                LocalDateTime localDateTime = hashMap.get(qq);
                 if (localDateTime != null) {
                     return localDateTime.isBefore(LocalDateTime.now());
                 } else {
@@ -233,9 +277,7 @@ public class SetuListener {
                             imageUrl = p.getOriginal().replace("pximg.net", "pixiv.cat");
                             pic = new File(TEMP + filename);
                         }
-                        InputStream content = Request.Get(imageUrl)
-                                .setHeader("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3")
-                                .execute().returnResponse().getEntity().getContent();
+                        InputStream content = Request.Get(imageUrl).setHeader(UA, UA_STRING).execute().returnResponse().getEntity().getContent();
                         if (!pic.exists()) {
                             FileUtils.copyInputStreamToFile(content, pic);
                         }

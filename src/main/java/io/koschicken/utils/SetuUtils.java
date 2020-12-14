@@ -10,7 +10,6 @@ import org.apache.http.client.fluent.Request;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
@@ -19,23 +18,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.koschicken.constants.Constants.COMMON_CONFIG;
+
 public class SetuUtils {
     private static final String YUBAN1073API = "http://api.yuban10703.xyz:2333/setu_v3";
     private static final String LOLICONAPI = "https://api.lolicon.app/setu/";
-    private static final Map<Integer, String> codeMap;
+    private static final Map<Integer, String> CODE_MAP;
     private static final Logger LOGGER = LoggerFactory.getLogger(SetuUtils.class);
 
-    @Value("${lolicon.apiKey}")
-    private static String LOLICON_API_KEY;
-
     static {
-        codeMap = new HashMap<>();
-        codeMap.put(-1, "接口发生内部错误");
-        codeMap.put(0, "成功");
-        codeMap.put(401, "APIKEY 不存在或被封禁");
-        codeMap.put(403, "由于不规范的操作而被拒绝调用");
-        codeMap.put(404, "找不到符合关键字的色图");
-        codeMap.put(429, "达到调用额度限制");
+        CODE_MAP = new HashMap<>();
+        CODE_MAP.put(-1, "接口发生内部错误");
+        CODE_MAP.put(0, "成功");
+        CODE_MAP.put(401, "APIKEY 不存在或被封禁");
+        CODE_MAP.put(403, "由于不规范的操作而被拒绝调用");
+        CODE_MAP.put(404, "找不到符合关键字的色图");
+        CODE_MAP.put(429, "达到调用额度限制");
     }
 
     private SetuUtils() {
@@ -89,7 +87,7 @@ public class SetuUtils {
 
     private static List<Pixiv> fetchFromLolicon(int num, String tag, Boolean r18) throws IOException {
         List<Pixiv> pics = new ArrayList<>();
-        String loliconApi = LOLICONAPI + "?apikey=" + LOLICON_API_KEY + "&r18=2&size1200=true&num=" + num;
+        String loliconApi = LOLICONAPI + "?apikey=" + COMMON_CONFIG.getLoliconApiKey() + "&r18=2&size1200=true&num=" + num;
         if (!StringUtils.isEmpty(tag)) {
             loliconApi += "&keyword=" + tag;
         }
@@ -114,7 +112,7 @@ public class SetuUtils {
         } else {
             Pixiv pixiv = new Pixiv();
             pixiv.setCode(code.toString());
-            pixiv.setMsg(codeMap.get(code));
+            pixiv.setMsg(CODE_MAP.get(code));
             pics.add(pixiv);
         }
         return pics;
