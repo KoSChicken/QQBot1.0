@@ -52,7 +52,7 @@ public class GuessVoiceListener {
     @Filter(value = {"#cygames-help"})
     public void cygamesHelp(GroupMsg msg, MsgSender sender) {
         sender.SENDER.sendGroupMsg(msg.getGroupCode(),
-                "#cygames 创建游戏；\nbot会发送一句语音并给出4个选项；\n输入序号#押注金额；\n之后bot会公布答案和答对的群友名单。");
+                "#cygames 创建游戏；\nbot会发送一句语音；\n输入名字#押注金额；\n之后bot会公布答案和答对的群友名单。");
     }
 
     @Listen(MsgGetTypes.groupMsg)
@@ -69,7 +69,7 @@ public class GuessVoiceListener {
     }
 
     @Listen(MsgGetTypes.groupMsg)
-    @Filter(value = {"[1234]#[0-9]*"})
+    @Filter(value = {".*#[0-9]*"})
     public void bet(GroupMsg msg, MsgSender sender) {
         if (gameMap.get(msg.getGroupCode()) == null) {
             sender.SENDER.sendGroupMsg(msg.getGroupCode(), "当前没有游戏");
@@ -77,8 +77,8 @@ public class GuessVoiceListener {
         }
         String str = msg.getMsg();
         String[] strings = str.split("#");
-        String no = strings[0];
-        int coin = Integer.parseInt(strings[1]);
+        String no = strings[0].trim();
+        int coin = Integer.parseInt(strings[1].trim());
         if (coin < 0) {
             sender.SENDER.sendGroupMsg(msg.getGroupCode(), "反向投注不可取");
             return;
@@ -121,30 +121,32 @@ public class GuessVoiceListener {
                 // 获取角色编号和名称，再获取其他三个角色作为备选答案
                 Integer characterCode = Integer.parseInt(audio.split("_")[2].substring(0, 4));
                 Characters answer = charactersService.findByCode(characterCode);
-                List<Characters> options = getOptions();
-                options.add(answer);
-                Collections.shuffle(options);
-                String answerIndex = "";
-                StringBuilder stringBuilder = new StringBuilder();
-                for (int i = 0; i < options.size(); i++) {
-                    String name = getName(options.get(i));
-                    stringBuilder.append(i + 1).append(". ").append(name).append("\n");
-                    if (characterCode.equals(options.get(i).getCode())) {
-                        answerIndex = String.valueOf(i + 1);
-                    }
-                }
-                sender.SENDER.sendGroupMsg(groupQQ, stringBuilder.append("60秒后揭晓答案。").toString());
-                LOGGER.info("答案：{}", getName(answer));
+//                List<Characters> options = getOptions();
+//                options.add(answer);
+//                Collections.shuffle(options);
+//                String answerIndex = "";
+//                StringBuilder stringBuilder = new StringBuilder();
+//                for (int i = 0; i < options.size(); i++) {
+//                    String name = getName(options.get(i));
+//                    stringBuilder.append(i + 1).append(". ").append(name).append("\n");
+//                    if (characterCode.equals(options.get(i).getCode())) {
+//                        answerIndex = String.valueOf(i + 1);
+//                    }
+//                }
+//                sender.SENDER.sendGroupMsg(groupQQ, stringBuilder.append("60秒后揭晓答案。").toString());
+                sender.SENDER.sendGroupMsg(groupQQ, delay + "秒后揭晓答案。");
+                String name = getName(answer);
+                LOGGER.info("答案：{}", name);
                 try {
                     Thread.sleep(delay * 1000L);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                     Thread.currentThread().interrupt();
                 }
-                sender.SENDER.sendGroupMsg(groupQQ, "答案为：" + answerIndex + ". " + getName(answer));
-                StringBuilder sb = getWinners(answerIndex);
+                sender.SENDER.sendGroupMsg(groupQQ, "答案为：" + name);
+                StringBuilder sb = getWinners(name);
                 sender.SENDER.sendGroupMsg(groupQQ, sb.toString());
-                allClear(answerIndex);
+                allClear(name);
             } else {
                 sender.SENDER.sendGroupMsg(groupQQ, "缺少声音资源文件");
             }
