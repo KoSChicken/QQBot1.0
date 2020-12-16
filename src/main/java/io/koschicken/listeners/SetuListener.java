@@ -2,12 +2,12 @@ package io.koschicken.listeners;
 
 import com.forte.qqrobot.anno.Filter;
 import com.forte.qqrobot.anno.Listen;
-import com.forte.qqrobot.beans.cqcode.CQCode;
 import com.forte.qqrobot.beans.messages.msgget.GroupMsg;
 import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
 import com.forte.qqrobot.sender.MsgSender;
-import com.forte.qqrobot.utils.CQCodeUtil;
+import com.simplerobot.modules.utils.KQCodeUtils;
 import io.koschicken.bean.Pixiv;
+import io.koschicken.constants.Constants;
 import io.koschicken.database.bean.Scores;
 import io.koschicken.database.service.ScoresService;
 import org.apache.commons.io.FileUtils;
@@ -18,6 +18,7 @@ import org.apache.http.client.fluent.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -34,6 +35,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static io.koschicken.constants.Constants.CQ_AT;
 import static io.koschicken.utils.SetuUtils.getSetu;
 
 @Component
@@ -48,10 +50,9 @@ public class SetuListener {
     private static final String UA = "User-Agent";
     private static final String UA_STRING = "Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3";
     private static final int CD = 20;
-    private static final String CQ_AT = "[CQ:at,qq=";
     private static final HashMap<String, Integer> NUMBER;
-    private static final double PRICE = 50;
     private static HashMap<String, HashMap<String, LocalDateTime>> coolDown;
+    private final KQCodeUtils kqCodeUtils = KQCodeUtils.getInstance();
 
     static {
         NUMBER = new HashMap<>();
@@ -84,6 +85,9 @@ public class SetuListener {
     @Autowired
     private ScoresService scoresService;
 
+    @Value("${setu.price}")
+    private double price;
+
     @Listen(MsgGetTypes.groupMsg)
     @Filter(value = {"叫车(.*)(.*)?(|r18)", "来(.*?)[点丶份张幅](.*?)的?(|r18)[色瑟涩][图圖]"})
     public void driver(GroupMsg msg, MsgSender sender) {
@@ -92,7 +96,7 @@ public class SetuListener {
             if (coin == null) {
                 createScore(msg, sender);
             } else {
-                if (coin.getScore() >= PRICE) {
+                if (coin.getScore() >= price) {
                     String message = msg.getMsg();
                     String regex = message.startsWith("叫车") ? "叫车(.*)(.*)?(|r18)" : "来(.*?)[点丶份张幅](.*?)的?(|r18)[色瑟涩][图圖]";
                     Pattern p = Pattern.compile(regex);
@@ -145,8 +149,8 @@ public class SetuListener {
             String uuid = UUID.randomUUID().toString();
             Path path = Paths.get(TEMP + uuid + ".jpg");
             Files.copy(content, path);
-            CQCode cqCodeImage = CQCodeUtil.build().getCQCode_Image(path.toAbsolutePath().toString());
-            sender.SENDER.sendGroupMsg(groupCode, cqCodeImage.toString());
+            String image = kqCodeUtils.toCq(Constants.cqType.IMAGE, Constants.cqPrefix.FILE + path.toAbsolutePath());
+            sender.SENDER.sendGroupMsg(groupCode, image);
         } else {
             sender.SENDER.sendGroupMsg(groupCode, "CD中...");
         }
@@ -163,8 +167,8 @@ public class SetuListener {
             String uuid = UUID.randomUUID().toString();
             Path path = Paths.get(TEMP + uuid + ".jpg");
             Files.copy(content, path);
-            CQCode cqCodeImage = CQCodeUtil.build().getCQCode_Image(path.toAbsolutePath().toString());
-            sender.SENDER.sendGroupMsg(groupCode, cqCodeImage.toString());
+            String image = kqCodeUtils.toCq(Constants.cqType.IMAGE, Constants.cqPrefix.FILE + path.toAbsolutePath());
+            sender.SENDER.sendGroupMsg(groupCode, image);
         } else {
             sender.SENDER.sendGroupMsg(groupCode, "CD中...");
         }
@@ -185,10 +189,9 @@ public class SetuListener {
             InputStream imageStream = Request.Get(api).execute().returnResponse().getEntity().getContent();
             File pic = new File(TEMP + qq + System.currentTimeMillis() + ".jpg");
             FileUtils.copyInputStreamToFile(imageStream, pic);
-            CQCode cqCodeImage = CQCodeUtil.build().getCQCode_Image(pic.getAbsolutePath());
+            String image = kqCodeUtils.toCq(Constants.cqType.IMAGE, Constants.cqPrefix.FILE + pic.getAbsolutePath());
             LOGGER.info(pic.getAbsolutePath());
-            String message = cqCodeImage.toString();
-            sender.SENDER.sendGroupMsg(msg.getGroupCode(), message);
+            sender.SENDER.sendGroupMsg(msg.getGroupCode(), image);
             FileUtils.deleteQuietly(pic);
         } catch (IOException e) {
             e.printStackTrace();
@@ -233,7 +236,7 @@ public class SetuListener {
         }
     }
 
-    static class SendSetu extends Thread {
+    class SendSetu extends Thread {
         private final String groupCode;
         private final String privateQQ;
         private final MsgSender sender;
@@ -280,8 +283,8 @@ public class SetuListener {
                             FileUtils.copyInputStreamToFile(content, pic);
                         }
                         // 发送图片
-                        CQCode cqCodeImage = CQCodeUtil.build().getCQCode_Image(pic.getAbsolutePath());
-                        String message = cqCodeImage + "\n" +
+                        String image = kqCodeUtils.toCq(Constants.cqType.IMAGE, Constants.cqPrefix.FILE + pic.getAbsolutePath());
+                        String message = image + "\n" +
                                 p.getTitle() + "\n" +
                                 ARTWORK_PREFIX + p.getArtwork() + "\n" +
                                 p.getAuthor() + "\n" +
@@ -301,7 +304,7 @@ public class SetuListener {
                         }
                         sendCount++;
                     }
-                    coin.setScore((int) (coin.getScore() - PRICE * sendCount));
+                    coin.setScore((int) (coin.getScore() - price * sendCount));
                     scoresService.updateById(coin); // 按照实际发送的张数来扣除叫车者的币
                 } else {
                     if (StringUtils.isEmpty(groupCode)) {

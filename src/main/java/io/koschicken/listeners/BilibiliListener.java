@@ -11,6 +11,7 @@ import com.simplerobot.modules.utils.KQCodeUtils;
 import io.koschicken.bilibili.Live;
 import io.koschicken.bilibili.User;
 import io.koschicken.bilibili.Video;
+import io.koschicken.constants.Constants;
 import io.koschicken.database.bean.Scores;
 import io.koschicken.database.service.LiveService;
 import io.koschicken.database.service.ScoresService;
@@ -28,8 +29,6 @@ import java.util.regex.Pattern;
 public class BilibiliListener {
 
     public static final Map<String, Live> LIVE_HASH_MAP = new HashMap<>();
-    private static final String CQ_TYPE = "image";
-    private static final String CQ_PARAMS = "file=";
 
     @Autowired
     LiveService liveService;
@@ -50,7 +49,7 @@ public class BilibiliListener {
         message += "\n签名:" + user.getSign();
 
         String image = KQCodeUtils.getInstance()
-                .toCq(CQ_TYPE, CQ_PARAMS + user.getFace().getAbsolutePath());
+                .toCq(Constants.cqType.IMAGE, Constants.cqPrefix.FILE + user.getFace().getAbsolutePath());
         message += "\n" + image;
         sender.SENDER.sendGroupMsg(msg.getGroupCode(), message);
     }
@@ -75,7 +74,7 @@ public class BilibiliListener {
             }
             if (bilibiliVideo != null) {
                 String image = KQCodeUtils.getInstance()
-                        .toCq(CQ_TYPE, CQ_PARAMS + bilibiliVideo.getPic().getAbsolutePath());
+                        .toCq(Constants.cqType.IMAGE, Constants.cqPrefix.FILE + bilibiliVideo.getPic().getAbsolutePath());
                 sender.SENDER.sendGroupMsg(msg.getGroupCode(),
                         "av号：" + av + "\nbv号：" + bv + "\n视频标题:" + bilibiliVideo.getTitle() + "\n" + image);
             }
@@ -115,7 +114,7 @@ public class BilibiliListener {
         } else {
             sender.SENDER.sendGroupMsg(msg.getGroupCode(), "开播啦！\n标题:" + live.getTitle() +
                     "\n链接:" + live.getUrl() + KQCodeUtils.getInstance()
-                    .toCq(CQ_TYPE, CQ_PARAMS + live.getCover().getAbsolutePath()));
+                    .toCq(Constants.cqType.IMAGE, Constants.cqPrefix.FILE + live.getCover().getAbsolutePath()));
         }
     }
 

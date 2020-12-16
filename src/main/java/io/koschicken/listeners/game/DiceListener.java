@@ -1,4 +1,4 @@
-package io.koschicken.listeners;
+package io.koschicken.listeners.game;
 
 import com.forte.qqrobot.anno.Filter;
 import com.forte.qqrobot.anno.Listen;
@@ -44,7 +44,7 @@ public class DiceListener {
 
     @Listen(MsgGetTypes.groupMsg)
     @Filter(value = {"骰子说明"})
-    public void startHorse(GroupMsg msg, MsgSender sender) {
+    public void diceHelp(GroupMsg msg, MsgSender sender) {
         sender.SENDER.sendGroupMsg(msg.getGroupCode(), "#骰子@机器人 创建游戏\n押骰子[大|小|豹子]#[金额] 下注\n#投掷骰子@机器人 开始游戏\n大小的倍率为"
                 + RATE_N + "，豹子倍率为" + RATE_B
         );
@@ -212,7 +212,7 @@ public class DiceListener {
                 return;
             }
             StringBuilder sb = new StringBuilder();
-            sb.append("[CQ:at,qq=").append(msg.getQQ()).append("]roll出了");
+            sb.append(CQ_AT).append(msg.getQQ()).append("]roll出了");
             for (int i = 0; i < count; i++) {
                 int singleDice = RandomUtils.nextInt(1, limit + 1);
                 sb.append("[").append(singleDice).append("]");
@@ -347,7 +347,7 @@ public class DiceListener {
             } else {
                 sb.append("恭喜");
                 for (Long qq : winner) {
-                    sb.append(" [CQ:at,qq=").append(qq).append("] ");
+                    sb.append(" ").append(CQ_AT).append(qq).append("] ");
                 }
                 sb.append("押中🎲，赢得了奖金");
             }

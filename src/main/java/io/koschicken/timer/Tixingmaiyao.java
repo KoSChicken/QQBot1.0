@@ -3,6 +3,7 @@ package io.koschicken.timer;
 import com.forte.qqrobot.bot.BotManager;
 import com.forte.qqrobot.bot.BotSender;
 import com.simplerobot.modules.utils.KQCodeUtils;
+import io.koschicken.constants.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -29,7 +30,7 @@ public class Tixingmaiyao {
             String str;
             if (file.exists()) {
                 KQCodeUtils kqCodeUtils = KQCodeUtils.getInstance();
-                str = kqCodeUtils.toCq("image", "file=" + file.getAbsolutePath());
+                str = kqCodeUtils.toCq(Constants.cqType.IMAGE, Constants.cqPrefix.FILE + file.getAbsolutePath());
             } else {
                 str = "图片找不到了cnmd";
             }

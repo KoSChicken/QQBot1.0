@@ -1,10 +1,19 @@
 package io.koschicken.utils;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.fluent.Request;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -133,5 +142,31 @@ public final class HttpUtils {
             ip = m.group(1);
         }
         return ip;
+    }
+
+    public static void main(String[] args) throws IOException {
+        final String VOICE = "./voice/cygames/";
+        final String UA = "User-Agent";
+        final String UA_STRING = "Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3";
+        String url = "https://redive.estertion.win/sound/vo_ci/";
+        Elements elements = Jsoup.connect(url).get().getElementsByTag("a");
+        for (int i = 1; i < elements.size(); i++) {
+            Element element = elements.get(i);
+            String href = element.attr("href");
+            Element e = Jsoup.connect(url + href).get().getElementsByTag("a").get(1);
+            String m4aHref = e.attr("href");
+            HttpResponse httpResponse = Request.Get(url + href + m4aHref).addHeader(UA, UA_STRING).execute().returnResponse();
+            InputStream content = httpResponse.getEntity().getContent();
+            Path path = Paths.get(VOICE + m4aHref);
+            if (!path.toFile().exists()) {
+                Files.copy(content, path);
+                System.out.println(m4aHref + "download success.");
+            }
+            try {
+                Thread.sleep(2 * 1000L);
+            } catch (InterruptedException interruptedException) {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 }

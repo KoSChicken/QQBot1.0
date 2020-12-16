@@ -4,6 +4,7 @@ import com.forte.qqrobot.bot.BotManager;
 import com.forte.qqrobot.bot.BotSender;
 import com.simplerobot.modules.utils.KQCodeUtils;
 import io.koschicken.bilibili.Live;
+import io.koschicken.constants.Constants;
 import io.koschicken.database.service.LiveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,13 +61,13 @@ public class BilibiliLive {
             String up = "\nUP：";
             String title = "\n标题：";
             String url = "\n链接：";
-            String imageTag = "image";
             Set<String> groupSet = new HashSet<>(liveService.findGroupByUid(uid));
             Live biliLive = live.get(uid);
             if (biliLive != null) {
                 stringBuilder.append("开播啦！").append(up).append(biliLive.getUser().getUname())
                         .append(title).append(biliLive.getTitle()).append(url).append(biliLive.getUrl()).append("\n")
-                        .append(KQCodeUtils.getInstance().toCq(imageTag, "file=" + biliLive.getCover().getAbsolutePath()));
+                        .append(KQCodeUtils.getInstance().toCq(Constants.cqType.IMAGE,
+                                Constants.cqPrefix.FILE + biliLive.getCover().getAbsolutePath()));
             }
             if (stringBuilder.length() > 0) {
                 for (String groupCode : groupSet) {
