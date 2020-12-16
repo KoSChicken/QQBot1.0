@@ -72,4 +72,9 @@ public class ScoresServiceImpl extends ServiceImpl<ScoresMapper, Scores> impleme
     public List<Scores> rank(String groupCode) {
         return qqGroupMapper.rank(groupCode);
     }
+
+    @Override
+    public void cygamesWin(String qq) {
+        scoresMapper.cygamesWin(qq);
+    }
 }

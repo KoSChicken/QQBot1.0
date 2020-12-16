@@ -27,6 +27,9 @@ public class Scores implements Serializable {
     @TableField(value = "roll_count")
     private Integer rollCount;
 
+    @TableField(value = "cygames_win")
+    private Integer cygamesWin;
+
     public String getQq() {
         return qq;
     }
@@ -75,6 +78,14 @@ public class Scores implements Serializable {
         this.rollCount = rollCount;
     }
 
+    public Integer getCygamesWin() {
+        return cygamesWin;
+    }
+
+    public void setCygamesWin(Integer cygamesWin) {
+        this.cygamesWin = cygamesWin;
+    }
+
     @Override
     public String toString() {
         return "Scores{" +
@@ -84,6 +95,7 @@ public class Scores implements Serializable {
                 ", score=" + score +
                 ", liveFlag=" + liveFlag +
                 ", rollCount=" + rollCount +
+                ", cygamesWin=" + cygamesWin +
                 '}';
     }
 }

@@ -41,4 +41,7 @@ public interface ScoresMapper extends BaseMapper<Scores> {
 
     @Select("select qq from scores where nickname = #{nickname}")
     Long selectQQByNickname(@Param("nickname") String nickname);
+
+    @Update("update scores set cygames_win = cygames_win + 1 where qq = ${qq}")
+    void cygamesWin(@Param("qq") String qq);
 }

@@ -1,5 +1,7 @@
 package io.koschicken.listeners.game;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.forte.qqrobot.anno.Filter;
 import com.forte.qqrobot.anno.Listen;
 import com.forte.qqrobot.beans.messages.msgget.GroupMsg;
@@ -10,7 +12,6 @@ import com.forte.qqrobot.sender.MsgSender;
 import com.simplerobot.modules.utils.KQCodeUtils;
 import io.koschicken.constants.Constants;
 import io.koschicken.database.bean.Characters;
-import io.koschicken.database.bean.Scores;
 import io.koschicken.database.service.CharactersService;
 import io.koschicken.database.service.ScoresService;
 import org.apache.commons.io.FileUtils;
@@ -20,11 +21,11 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.koschicken.constants.Constants.CQ_AT;
 
@@ -35,8 +36,12 @@ public class GuessVoiceListener {
     private static final String VOICE_FOLDER = "./voice/";
     private static final String CYGAMES_FOLDER = "cygames/";
 
-    // 群号->映射群员->映射押注内容 押注金额
-    private static final HashMap<String, Map<Long, List<String>>> gameMap = new HashMap<>();
+    // 群号->(群员, 回答)
+    private static final Map<String, Map<String, String>> gameMap = new ConcurrentHashMap<>();
+    // 群号->答案
+    private static final Map<String, String> answerMap = new ConcurrentHashMap<>();
+    // 群号->提示
+    private static final Map<String, List<String>> hintMap = new ConcurrentHashMap<>();
 
     @Autowired
     ScoresService scoresService;
@@ -45,14 +50,12 @@ public class GuessVoiceListener {
     @Autowired
     private BotManager botManager;
 
-    @Value("${cygames.delay}")
-    private int delay;
-
     @Listen(MsgGetTypes.groupMsg)
     @Filter(value = {"#cygames-help"})
     public void cygamesHelp(GroupMsg msg, MsgSender sender) {
         sender.SENDER.sendGroupMsg(msg.getGroupCode(),
-                "#cygames 创建游戏；\nbot会发送一句语音；\n输入名字#押注金额；\n之后bot会公布答案和答对的群友名单。");
+                "#cygames 创建游戏；\nbot会发送一句语音；\n输入A+名字（如A日和）；\n当有人答对时游戏结束。\n" +
+                "输入#cygames-hint，可以获取提示，提示次数限制为3次，第一次提示种族，第二次提示名字长度，最后一次提示所属公会。");
     }
 
     @Listen(MsgGetTypes.groupMsg)
@@ -69,36 +72,52 @@ public class GuessVoiceListener {
     }
 
     @Listen(MsgGetTypes.groupMsg)
-    @Filter(value = {".*#[0-9]*"})
+    @Filter(value = {"A.*"})
     public void bet(GroupMsg msg, MsgSender sender) {
-        if (gameMap.get(msg.getGroupCode()) == null) {
-            sender.SENDER.sendGroupMsg(msg.getGroupCode(), "当前没有游戏");
+        String groupCode = msg.getGroupCode();
+        if (gameMap.get(groupCode) == null) {
+            sender.SENDER.sendGroupMsg(groupCode, "当前没有游戏");
             return;
         }
+        String qq = msg.getQQ();
         String str = msg.getMsg();
-        String[] strings = str.split("#");
-        String no = strings[0].trim();
-        int coin = Integer.parseInt(strings[1].trim());
-        if (coin < 0) {
-            sender.SENDER.sendGroupMsg(msg.getGroupCode(), "反向投注不可取");
-            return;
-        }
-        Scores scores = scoresService.getById(msg.getCodeNumber());
-        if (scores == null || scores.getScore() - coin < 0) {
-            sender.SENDER.sendGroupMsg(msg.getGroupCode(), "没那么多币");
-            return;
-        }
-        if (gameMap.get(msg.getGroupCode()).get(msg.getCodeNumber()) != null) {
-            sender.SENDER.sendGroupMsg(msg.getGroupCode(), "你已经猜过了");
+        String answer = str.substring(1);
+        if (gameMap.get(groupCode).get(qq) != null) {
+            sender.SENDER.sendGroupMsg(groupCode, "你已经猜过了");
         } else {
-            List<String> list = new ArrayList<>();
-            list.add(no);
-            list.add(String.valueOf(coin));
-            gameMap.get(msg.getGroupCode()).put(msg.getCodeNumber(), list);
-            scores.setScore(scores.getScore() - coin);
-            scoresService.updateById(scores);
-            sender.SENDER.sendGroupMsg(msg.getGroupCode(), "👌");
+            gameMap.get(groupCode).put(qq, answer);
+            if (Objects.equals(answer, answerMap.get(groupCode))) {
+                sender.SENDER.sendGroupMsg(groupCode, announceWinner(groupCode, qq));
+            } else {
+                sender.SENDER.sendGroupMsg(groupCode, CQ_AT + qq + "] 猜错了，等下一轮游戏吧");
+            }
         }
+    }
+
+    @Listen(MsgGetTypes.groupMsg)
+    @Filter("#cygames-hint")
+    public void cygamesHint(GroupMsg msg, MsgSender sender) {
+        String groupCode = msg.getGroupCode();
+        Map<String, String> map = gameMap.get(groupCode);
+        if (map != null) {
+            List<String> hintList = hintMap.get(groupCode);
+            if (hintList != null && !hintList.isEmpty()) {
+                sender.SENDER.sendGroupMsg(groupCode, hintList.get(0));
+                hintList.remove(0);
+            } else {
+                sender.SENDER.sendGroupMsg(groupCode, "提示次数已经用完");
+            }
+        } else {
+            sender.SENDER.sendGroupMsg(groupCode, "当前没有游戏");
+        }
+    }
+
+    private String announceWinner(String groupQQ, String qq) {
+        scoresService.cygamesWin(qq);
+        gameMap.remove(groupQQ);
+        hintMap.remove(groupQQ);
+        answerMap.remove(groupQQ);
+        return "恭喜" + " " + CQ_AT + qq + "] 猜中答案";
     }
 
     public class Cygames extends Thread {
@@ -118,49 +137,32 @@ public class GuessVoiceListener {
                 String voice = utils.toCq("voice", param);
                 LOGGER.info(voice);
                 sender.SENDER.sendGroupMsg(groupQQ, voice);
-                // 获取角色编号和名称，再获取其他三个角色作为备选答案
                 Integer characterCode = Integer.parseInt(audio.split("_")[2].substring(0, 4));
                 Characters answer = charactersService.findByCode(characterCode);
-//                List<Characters> options = getOptions();
-//                options.add(answer);
-//                Collections.shuffle(options);
-//                String answerIndex = "";
-//                StringBuilder stringBuilder = new StringBuilder();
-//                for (int i = 0; i < options.size(); i++) {
-//                    String name = getName(options.get(i));
-//                    stringBuilder.append(i + 1).append(". ").append(name).append("\n");
-//                    if (characterCode.equals(options.get(i).getCode())) {
-//                        answerIndex = String.valueOf(i + 1);
-//                    }
-//                }
-//                sender.SENDER.sendGroupMsg(groupQQ, stringBuilder.append("60秒后揭晓答案。").toString());
-                sender.SENDER.sendGroupMsg(groupQQ, delay + "秒后揭晓答案。");
                 String name = getName(answer);
+                answerMap.put(groupQQ, name);
                 LOGGER.info("答案：{}", name);
-                try {
-                    Thread.sleep(delay * 1000L);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    Thread.currentThread().interrupt();
-                }
-                sender.SENDER.sendGroupMsg(groupQQ, "答案为：" + name);
-                StringBuilder sb = getWinners(name);
-                sender.SENDER.sendGroupMsg(groupQQ, sb.toString());
-                allClear(name);
+                List<String> hintList = new ArrayList<>();
+                hintList.add("提示1：种族是" + getProfile(answer, "种族"));
+                hintList.add("提示2：姓名长度是" + name.length());
+                hintList.add("提示3：所属公会是" + getProfile(answer, "公会"));
+                hintMap.put(groupQQ, hintList);
             } else {
                 sender.SENDER.sendGroupMsg(groupQQ, "缺少声音资源文件");
             }
         }
 
-        @NotNull
-        private List<Characters> getOptions() {
-            List<Characters> options = new ArrayList<>();
-            List<Characters> all = charactersService.list();
-            for (int i = 0; i < 3; i++) {
-                Collections.shuffle(all);
-                options.add(all.get(0));
+        private String getProfile(Characters characters, String key) {
+            String profile = characters.getProfile();
+            if (profile.endsWith(",")) {
+                profile = profile.substring(0, profile.length() - 1);
             }
-            return options;
+            if (!StringUtils.isEmpty(profile)) {
+                JSONObject jsonObject = JSON.parseObject(profile);
+                return jsonObject.getString(key);
+            } else {
+                return "未知";
+            }
         }
 
         @NotNull
@@ -180,46 +182,6 @@ public class GuessVoiceListener {
             } else {
                 return null;
             }
-        }
-
-        private StringBuilder getWinners(String answer) {
-            Map<Long, List<String>> map = gameMap.get(groupQQ);
-            List<Long> winner = new ArrayList<>();
-            map.forEach((qq, value) -> {
-                List<String> list = map.get(qq);
-                String str = list.get(0);
-                if (str.equals(answer)) {
-                    winner.add(qq);
-                }
-            });
-            StringBuilder sb = new StringBuilder();
-            if (winner.isEmpty()) {
-                sb.append("本次游戏无人猜中，很遗憾");
-            } else {
-                sb.append("恭喜");
-                for (Long qq : winner) {
-                    sb.append(" ").append(CQ_AT).append(qq).append("] ");
-                }
-                sb.append("猜中答案，赢得了奖金");
-            }
-            return sb;
-        }
-
-        private void allClear(String answer) {
-            Map<Long, List<String>> group = gameMap.get(groupQQ);
-            Iterator<Long> iterator = group.keySet().iterator();
-            List<Scores> list = new ArrayList<>();
-            while (iterator.hasNext()) {
-                Long entry = iterator.next();
-                String s = group.get(entry).get(0);
-                if (s.equals(answer)) {
-                    Scores byId = scoresService.getById(entry);
-                    byId.setScore(byId.getScore() + Integer.parseInt(group.get(entry).get(1)));
-                    list.add(byId);
-                }
-            }
-            scoresService.updateBatchById(list);
-            gameMap.remove(groupQQ);
         }
     }
 }
