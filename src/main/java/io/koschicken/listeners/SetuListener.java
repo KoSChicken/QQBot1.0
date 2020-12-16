@@ -86,7 +86,7 @@ public class SetuListener {
 
     @Listen(MsgGetTypes.groupMsg)
     @Filter(value = {"叫车(.*)(.*)?(|r18)", "来(.*?)[点丶份张幅](.*?)的?(|r18)[色瑟涩][图圖]"})
-    public void jiaoche(GroupMsg msg, MsgSender sender) {
+    public void driver(GroupMsg msg, MsgSender sender) {
         if (isCool(msg.getQQ(), msg.getGroupCode())) {
             Scores coin = scoresService.getById(msg.getCodeNumber());
             if (coin == null) {
@@ -136,8 +136,8 @@ public class SetuListener {
     }
 
     @Listen(MsgGetTypes.groupMsg)
-    @Filter(value = "#awsl")
-    public void awsl(GroupMsg msg, MsgSender sender) throws IOException {
+    @Filter(value = "#抽奖")
+    public void luck(GroupMsg msg, MsgSender sender) throws IOException {
         String groupCode = msg.getGroupCode();
         if (isCool(msg.getQQ(), groupCode)) {
             HttpResponse httpResponse = Request.Get(AWSL).addHeader(UA, UA_STRING).execute().returnResponse();
@@ -213,8 +213,6 @@ public class SetuListener {
 
     /**
      * 获取冷却时间是不是到了
-     *
-     * @param qq
      */
     private boolean isCool(String qq, String groupCode) {
         if (coolDown == null) {
@@ -307,9 +305,9 @@ public class SetuListener {
                     scoresService.updateById(coin); // 按照实际发送的张数来扣除叫车者的币
                 } else {
                     if (StringUtils.isEmpty(groupCode)) {
-                        sender.SENDER.sendPrivateMsg(privateQQ, pixiv.getMsg());
+                        sender.SENDER.sendPrivateMsg(privateQQ, "冇");
                     } else {
-                        sender.SENDER.sendGroupMsg(groupCode, pixiv.getMsg());
+                        sender.SENDER.sendGroupMsg(groupCode, "冇");
                     }
                 }
             } catch (IOException e) {
