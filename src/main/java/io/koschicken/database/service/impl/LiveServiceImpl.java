@@ -24,4 +24,9 @@ public class LiveServiceImpl extends ServiceImpl<LiveMapper, Live> implements Li
     public void deleteOne(String qq, String biliUid) {
         liveMapper.deleteOne(qq, biliUid);
     }
+
+    @Override
+    public List<String> findGroupByUid(String biliUid) {
+        return liveMapper.findGroupByUid(biliUid);
+    }
 }

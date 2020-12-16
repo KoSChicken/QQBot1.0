@@ -15,7 +15,7 @@ public interface ScoresMapper extends BaseMapper<Scores> {
     @Update("update scores set sign_flag = false")
     void clearSign();
 
-    @Update("update Scores set roll = 3")
+    @Update("update Scores set roll_count = 3")
     void clearRoll();
 
     @Select("select sign_flag from scores where qq = ${qq}")

@@ -26,6 +26,7 @@ public class Live {
     private File cover;
     private int online;
     private int roomId;
+    private User user;
 
     public Live(String mid) throws IOException {
         this.mid = mid;
@@ -64,6 +65,7 @@ public class Live {
     }
 
     public void fresh() throws IOException {
+        user = new User(mid);
         String live = getLive(mid);
         JSONObject jsonObject = JSON.parseObject(live);
         JSONObject data = jsonObject.getJSONObject("data");
@@ -140,5 +142,9 @@ public class Live {
 
     public int getRoomId() {
         return roomId;
+    }
+
+    public User getUser() {
+        return user;
     }
 }
