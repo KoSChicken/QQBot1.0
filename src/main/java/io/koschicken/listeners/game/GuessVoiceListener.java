@@ -25,8 +25,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static io.koschicken.constants.Constants.CQ_AT;
 
@@ -77,16 +75,10 @@ public class GuessVoiceListener {
             sender.SENDER.sendGroupMsg(msg.getGroupCode(), "当前没有游戏");
             return;
         }
-        String re = "^[1234]#[0-9]*$";
         String str = msg.getMsg();
-        Pattern p = Pattern.compile(re);
-        Matcher m = p.matcher(str);
-        String no = "";
-        int coin = 0;
-        while (m.find()) {
-            no = m.group(1);
-            coin = Integer.parseInt(m.group(2));
-        }
+        String[] strings = str.split("#");
+        String no = strings[0];
+        int coin = Integer.parseInt(strings[1]);
         if (coin < 0) {
             sender.SENDER.sendGroupMsg(msg.getGroupCode(), "反向投注不可取");
             return;
@@ -105,7 +97,7 @@ public class GuessVoiceListener {
             gameMap.get(msg.getGroupCode()).put(msg.getCodeNumber(), list);
             scores.setScore(scores.getScore() - coin);
             scoresService.updateById(scores);
-            sender.SENDER.sendGroupMsg(msg.getGroupCode(), "下注完成");
+            sender.SENDER.sendGroupMsg(msg.getGroupCode(), "👌");
         }
     }
 
