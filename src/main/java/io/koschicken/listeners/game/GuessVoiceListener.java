@@ -86,7 +86,7 @@ public class GuessVoiceListener {
             sender.SENDER.sendGroupMsg(groupCode, "你已经猜过了");
         } else {
             gameMap.get(groupCode).put(qq, answer);
-            if (Objects.equals(answer, answerMap.get(groupCode))) {
+            if (answerMap.get(groupCode).contains(answer)) {
                 sender.SENDER.sendGroupMsg(groupCode, announceWinner(groupCode, qq));
             } else {
                 sender.SENDER.sendGroupMsg(groupCode, CQ_AT + qq + "] 猜错了，等下一轮游戏吧");
@@ -110,6 +110,15 @@ public class GuessVoiceListener {
         } else {
             sender.SENDER.sendGroupMsg(groupCode, "当前没有游戏");
         }
+    }
+
+    @Listen(MsgGetTypes.groupMsg)
+    @Filter("#cygames-shut")
+    public void cygamesShut(GroupMsg msg, MsgSender sender) {
+        String groupCode = msg.getGroupCode();
+        gameMap.remove(groupCode);
+        hintMap.remove(groupCode);
+        answerMap.remove(groupCode);
     }
 
     private String announceWinner(String groupQQ, String qq) {
@@ -140,7 +149,7 @@ public class GuessVoiceListener {
                 Integer characterCode = Integer.parseInt(audio.split("_")[2].substring(0, 4));
                 Characters answer = charactersService.findByCode(characterCode);
                 String name = getName(answer);
-                answerMap.put(groupQQ, name);
+                answerMap.put(groupQQ, answer.getName());
                 LOGGER.info("答案：{}", name);
                 List<String> hintList = new ArrayList<>();
                 hintList.add("提示1：种族是" + getProfile(answer, "种族"));
