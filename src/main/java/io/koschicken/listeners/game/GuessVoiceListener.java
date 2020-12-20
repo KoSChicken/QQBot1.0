@@ -54,7 +54,7 @@ public class GuessVoiceListener {
     @Filter(value = {"#cygames-help"})
     public void cygamesHelp(GroupMsg msg, MsgSender sender) {
         sender.SENDER.sendGroupMsg(msg.getGroupCode(),
-                "#cygames 创建游戏；\nbot会发送一句语音；\n输入A+名字（如A日和）；\n当有人答对时游戏结束。\n" +
+                "#cygames 创建游戏；\nbot会发送一句语音；\n输入!+名字（如!日和）；\n当有人答对时游戏结束。\n" +
                 "输入#cygames-hint，可以获取提示，提示次数限制为3次，第一次提示种族，第二次提示名字长度，最后一次提示所属公会。");
     }
 
@@ -72,7 +72,7 @@ public class GuessVoiceListener {
     }
 
     @Listen(MsgGetTypes.groupMsg)
-    @Filter(value = {"A.*"})
+    @Filter(value = {"[！!].*"})
     public void bet(GroupMsg msg, MsgSender sender) {
         String groupCode = msg.getGroupCode();
         if (gameMap.get(groupCode) == null) {
@@ -82,14 +82,16 @@ public class GuessVoiceListener {
         String qq = msg.getQQ();
         String str = msg.getMsg();
         String answer = str.substring(1);
-        if (gameMap.get(groupCode).get(qq) != null) {
-            sender.SENDER.sendGroupMsg(groupCode, "你已经猜过了");
-        } else {
-            gameMap.get(groupCode).put(qq, answer);
-            if (answerMap.get(groupCode).contains(answer)) {
-                sender.SENDER.sendGroupMsg(groupCode, announceWinner(groupCode, qq));
+        if (StringUtils.isNotEmpty(answer) && !answer.contains("!") && !answer.contains("！")) {
+            if (gameMap.get(groupCode).get(qq) != null) {
+                sender.SENDER.sendGroupMsg(groupCode, "下次吧");
             } else {
-                sender.SENDER.sendGroupMsg(groupCode, CQ_AT + qq + "] 猜错了，等下一轮游戏吧");
+                gameMap.get(groupCode).put(qq, answer);
+                if (answerMap.get(groupCode).toLowerCase().contains(answer.toLowerCase())) {
+                    sender.SENDER.sendGroupMsg(groupCode, announceWinner(groupCode, qq));
+                } else {
+                    sender.SENDER.sendGroupMsg(groupCode, CQ_AT + qq + "] 猜错了");
+                }
             }
         }
     }
