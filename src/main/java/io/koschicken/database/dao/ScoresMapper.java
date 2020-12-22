@@ -44,4 +44,7 @@ public interface ScoresMapper extends BaseMapper<Scores> {
 
     @Update("update scores set cygames_win = cygames_win + 1 where qq = ${qq}")
     void cygamesWin(@Param("qq") String qq);
+
+    @Select("select l.qq, count(l.qq) as 'count' from lucky l left join qq_group g on g.qq = l.qq where g.group_code = #{groupCode} group by l.qq order by count(l.qq) desc")
+    void cygamesRank();
 }

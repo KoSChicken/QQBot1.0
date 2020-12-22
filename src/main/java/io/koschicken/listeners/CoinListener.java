@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -64,6 +65,8 @@ public class CoinListener {
             if (score > 15) {
                 message = Constants.CQ_AT + qq + "] 签到成功，币+" + score + "，现在币:" + scores.getScore();
             } else {
+                Lucky entity = new Lucky(msg.getCodeNumber(), new Date(), score);
+                luckyService.save(entity);
                 message = Constants.CQ_AT + qq + "] 天选之人！币+" + score + "，现在币:" + scores.getScore();
             }
             sender.SENDER.sendGroupMsg(groupCode, message);
