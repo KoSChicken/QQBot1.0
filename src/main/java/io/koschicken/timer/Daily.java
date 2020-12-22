@@ -11,11 +11,11 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * 重置签到，清理临时文件夹
+ * 每天0点的定时任务，包括重置签到/roll，清理临时文件夹，生成本日彩票等等操作
  */
 @Component
 @EnableScheduling
-public class ClearSign {
+public class Daily {
 
     @Autowired
     ScoresService scoresService;

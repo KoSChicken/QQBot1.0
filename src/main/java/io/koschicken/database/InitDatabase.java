@@ -46,10 +46,11 @@ public class InitDatabase {
                 statement.executeUpdate("create table 'version'('version' integer)");
                 statement.executeUpdate("insert into version values (" + NEW_VERSION + ")");
                 statement.executeUpdate("create table pic (pid integer primary key, last_send_time datetime)");
-                statement.executeUpdate("create table scores (qq varchar(15) primary key, nickname varchar(50), sign_flag boolean default false, live_flag boolean default false, score integer default 0, roll_count integer default 3)");
+                statement.executeUpdate("create table scores (qq varchar(15) primary key, nickname varchar(50), sign_flag boolean default false, live_flag boolean default false, score integer default 0, roll_count integer default 3, cygames_win integer default 0, lottery varchar(4))");
                 statement.executeUpdate("create table qq_group (id integer not null constraint group_pk primary key autoincrement, qq varchar(15) not null, group_code varchar(15) not null)");
                 statement.executeUpdate("create table live (id integer not null constraint live_pk primary key autoincrement, qq varchar(15) not null, bili_uid varchar(15) not null)");
                 statement.executeUpdate("create table lucky (id integer not null constraint lucky_pk primary key autoincrement, qq integer, date datetime, coin integer)");
+                statement.executeUpdate("create table lottery (id integer not null constraint lottery_pk primary key autoincrement, result varchar(4), date datetime)");
             }
         } catch (SQLException e) {
             e.printStackTrace();

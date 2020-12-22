@@ -143,7 +143,7 @@ public class GuessVoiceListener {
             if (!StringUtils.isEmpty(audio)) {
                 String param = Constants.cqPrefix.FILE + VOICE_FOLDER + CYGAMES_FOLDER + audio;
                 KQCodeUtils utils = KQCodeUtils.getInstance();
-                String voice = utils.toCq("voice", param);
+                String voice = utils.toCq("record", param);
                 LOGGER.info(voice);
                 sender.SENDER.sendGroupMsg(groupQQ, voice);
                 Integer characterCode = Integer.parseInt(audio.split("_")[2].substring(0, 4));
