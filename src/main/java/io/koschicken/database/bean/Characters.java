@@ -2,9 +2,13 @@ package io.koschicken.database.bean;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
 
 import java.io.Serializable;
 
+@Data
+@TableName("characters")
 public class Characters implements Serializable {
 
     private static final long serialVersionUID = 6503985789018451916L;

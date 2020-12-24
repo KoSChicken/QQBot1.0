@@ -2,7 +2,6 @@ package io.koschicken.database.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import io.koschicken.database.bean.Scores;
-import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -28,5 +27,7 @@ public interface ScoresService extends IService<Scores> {
 
     List<Scores> rank(String groupCode);
 
-    void cygamesWin(@Param("qq") String qq);
+    void cygamesWin(String qq);
+
+    List<Scores> cygamesRank();
 }

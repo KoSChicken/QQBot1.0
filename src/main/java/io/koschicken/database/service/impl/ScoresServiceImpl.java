@@ -77,4 +77,9 @@ public class ScoresServiceImpl extends ServiceImpl<ScoresMapper, Scores> impleme
     public void cygamesWin(String qq) {
         scoresMapper.cygamesWin(qq);
     }
+
+    @Override
+    public List<Scores> cygamesRank() {
+        return scoresMapper.cygamesRank();
+    }
 }
