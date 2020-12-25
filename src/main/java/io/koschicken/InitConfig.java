@@ -5,10 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import io.koschicken.bean.CommonConfig;
 import io.koschicken.bean.GroupPower;
 import io.koschicken.bean.HorseEvent;
-import io.koschicken.constants.Constants;
 import io.koschicken.constants.GameConstants;
 import io.koschicken.utils.SafeProperties;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import static io.koschicken.constants.Constants.COMMON_CONFIG;
 import static io.koschicken.constants.Constants.CONFIG_DIR;
 import static io.koschicken.constants.PCRConstants.*;
 import static io.koschicken.listeners.intercept.PCRIntercept.GROUP_CONFIG_MAP;
@@ -49,16 +50,16 @@ public class InitConfig {
                 e.printStackTrace();
             }
         } else {
-            //读取到了
-            String jsonString;
             try {
-                jsonString = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-                JSONObject jsonObject = JSON.parseObject(jsonString);
-                Set<String> keySet = jsonObject.keySet();
-                for (String s : keySet) {
-                    String string = jsonObject.getJSONObject(s).toJSONString();
-                    GroupPower keyValues = JSON.parseObject(string, GroupPower.class);
-                    GROUP_CONFIG_MAP.put(s, keyValues);
+                String jsonString = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+                if (StringUtils.isNotEmpty(jsonString)) {
+                    JSONObject jsonObject = JSON.parseObject(jsonString);
+                    Set<String> keySet = jsonObject.keySet();
+                    for (String s : keySet) {
+                        String string = jsonObject.getJSONObject(s).toJSONString();
+                        GroupPower keyValues = JSON.parseObject(string, GroupPower.class);
+                        GROUP_CONFIG_MAP.put(s, keyValues);
+                    }
                 }
             } catch (IOException | NullPointerException e) {
                 e.printStackTrace();
@@ -76,12 +77,23 @@ public class InitConfig {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Constants.COMMON_CONFIG = new CommonConfig("买药.png", 300, 5,
-                    true, true, true, true, "",
-                    5000, 1000, true);
+            COMMON_CONFIG = new CommonConfig();
+            COMMON_CONFIG.setMaiyaoPic("买药.png");
+            COMMON_CONFIG.setGachaLimit(300);
+            COMMON_CONFIG.setGachaCooldown(10);
+            COMMON_CONFIG.setGlobalSwitch(false);
+            COMMON_CONFIG.setGachaSwitch(false);
+            COMMON_CONFIG.setMaiyaoSwitch(false);
+            COMMON_CONFIG.setHorseSwitch(false);
+            COMMON_CONFIG.setDiceSwitch(false);
+            COMMON_CONFIG.setSetuSwitch(false);
+            COMMON_CONFIG.setLotterySwitch(false);
+            COMMON_CONFIG.setSignCoin(5000);
+            COMMON_CONFIG.setSetuCoin(500);
+            COMMON_CONFIG.setR18Private(true);
         }
         try {
-            Constants.COMMON_CONFIG = loadConfig(file);
+            COMMON_CONFIG = loadConfig(file);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -95,11 +107,14 @@ public class InitConfig {
         pro.setProperty("抽卡上限", "1000");
         pro.addComment("每次抽卡中间所需的冷却时间，单位为秒");
         pro.setProperty("抽卡冷却", "5");
-        pro.addComment("以下四个为机器人开关的默认设置 true为开，false为关");
-        pro.setProperty("总开关默认开启", "true");
-        pro.setProperty("抽卡默认开启", "true");
-        pro.setProperty("买药提醒默认开启", "true");
-        pro.setProperty("赛马默认开启", "true");
+        pro.addComment("以下为机器人开关的默认设置 true为开，false为关");
+        pro.setProperty("总开关默认关闭", String.valueOf(Boolean.FALSE));
+        pro.setProperty("抽卡默认关闭", String.valueOf(Boolean.FALSE));
+        pro.setProperty("买药提醒默认关闭", String.valueOf(Boolean.FALSE));
+        pro.setProperty("赛马默认关闭", String.valueOf(Boolean.FALSE));
+        pro.setProperty("骰子默认关闭", String.valueOf(Boolean.FALSE));
+        pro.setProperty("彩票默认关闭", String.valueOf(Boolean.FALSE));
+        pro.setProperty("色图默认关闭", String.valueOf(Boolean.FALSE));
         pro.addComment("主人qq相当于在所有群里对这个机器人有管理员权限");
         pro.setProperty("主人qq", "");
         pro.addComment("签到增加币数目，设置为负数则有可能会越签越少");
@@ -125,10 +140,13 @@ public class InitConfig {
         commonConfig.setMaiyaoPic(pro.getProperty("提醒买药小助手图片名"));
         commonConfig.setGachaLimit(Integer.parseInt(pro.getProperty("抽卡上限")));
         commonConfig.setGachaCooldown(Integer.parseInt(pro.getProperty("抽卡冷却")));
-        commonConfig.setGlobalSwitch(Boolean.parseBoolean(pro.getProperty("总开关默认开启")));
-        commonConfig.setGachaSwitch(Boolean.parseBoolean(pro.getProperty("抽卡默认开启")));
-        commonConfig.setMaiyaoSwitch(Boolean.parseBoolean(pro.getProperty("买药提醒默认开启")));
-        commonConfig.setHorseSwitch(Boolean.parseBoolean(pro.getProperty("赛马默认开启")));
+        commonConfig.setGlobalSwitch(Boolean.parseBoolean(pro.getProperty("总开关默认关闭")));
+        commonConfig.setGachaSwitch(Boolean.parseBoolean(pro.getProperty("抽卡默认关闭")));
+        commonConfig.setMaiyaoSwitch(Boolean.parseBoolean(pro.getProperty("买药提醒默认关闭")));
+        commonConfig.setHorseSwitch(Boolean.parseBoolean(pro.getProperty("赛马默认关闭")));
+        commonConfig.setDiceSwitch(Boolean.parseBoolean(pro.getProperty("骰子默认关闭")));
+        commonConfig.setLotterySwitch(Boolean.parseBoolean(pro.getProperty("彩票默认关闭")));
+        commonConfig.setSetuSwitch(Boolean.parseBoolean(pro.getProperty("色图默认关闭")));
         commonConfig.setMasterQQ(pro.getProperty("主人qq"));
         commonConfig.setSignCoin(Integer.parseInt(pro.getProperty("签到一次金币")));
         commonConfig.setSetuCoin(Integer.parseInt(pro.getProperty("发一次色图花费")));

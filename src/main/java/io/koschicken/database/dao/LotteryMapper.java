@@ -10,6 +10,9 @@ import org.springframework.stereotype.Repository;
 @Mapper
 public interface LotteryMapper extends BaseMapper<Lottery> {
 
-    @Select("select * from lottery where group_code = #{groupCode}")
+    @Select("select * from lottery " +
+            "where group_code = #{groupCode} " +
+            "and date((create_time/1000), 'unixepoch', 'localtime') = current_date " +
+            "order by id desc limit 1")
     Lottery today(String groupCode);
 }

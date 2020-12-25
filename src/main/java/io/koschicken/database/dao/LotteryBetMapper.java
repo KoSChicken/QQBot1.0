@@ -12,6 +12,17 @@ import java.util.List;
 @Mapper
 public interface LotteryBetMapper extends BaseMapper<LotteryBet> {
 
+    @Select("select * from lottery_bet " +
+            "where date((create_time / 1000), 'unixepoch', 'localtime') = current_date " +
+            "and group_code = #{groupCode}")
+    List<LotteryBet> listToday(String groupCode);
+
     @Select("select * from lottery_bet where lottery = #{lottery} and group_code = #{groupCode}")
     List<LotteryBet> lottery(String lottery, String groupCode);
+
+    @Select("select * from lottery_bet where qq = #{qq} " +
+            "and group_code = #{groupCode} " +
+            "and date((create_time / 1000), 'unixepoch', 'localtime') = current_date " +
+            "order by id desc limit 1")
+    LotteryBet findByQQAndGroupCode(String qq, String groupCode);
 }

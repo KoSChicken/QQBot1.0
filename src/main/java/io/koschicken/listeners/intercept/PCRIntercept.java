@@ -21,15 +21,28 @@ public class PCRIntercept implements MsgIntercept {
     public boolean intercept(MsgGetContext context) {
         if (context.getMsgGet() instanceof GroupMsg) {
             try {
+                GroupPower groupPower = GROUP_CONFIG_MAP.get(((GroupMsg) context.getMsgGet()).getGroupCode());
                 //总体开关
-                if (!(GROUP_CONFIG_MAP.get(((GroupMsg) context.getMsgGet()).getGroupCode())).isGlobalSwitch()) {
+                if (!groupPower.isGlobalSwitch()) {
                     String masterQQ = Constants.COMMON_CONFIG.getMasterQQ();
                     String qq = ((GroupMsg) context.getMsgGet()).getQQ();
                     return isOpen(context.getMsgGet().getMsg()) && Objects.equals(masterQQ, qq);
                 }
                 //抽卡消息过滤
                 if (isChouKa(context.getMsgGet().getMsg())) {
-                    return GROUP_CONFIG_MAP.get(((GroupMsg) context.getMsgGet()).getGroupCode()).isGachaSwitch();
+                    return groupPower.isGachaSwitch();
+                }
+                //赛马消息过滤
+                if (isHorse(context.getMsgGet().getMsg())) {
+                    return groupPower.isGachaSwitch();
+                }
+                //骰子消息过滤
+                if (isDice(context.getMsgGet().getMsg())) {
+                    return groupPower.isGachaSwitch();
+                }
+                //setu消息过滤
+                if (isSetu(context.getMsgGet().getMsg())) {
+                    return groupPower.isGachaSwitch();
                 }
             } catch (NullPointerException e) {
                 //没这个群的信息
@@ -38,6 +51,8 @@ public class PCRIntercept implements MsgIntercept {
                 groupPower.setMaiyaoSwitch(Constants.COMMON_CONFIG.isMaiyaoSwitch());
                 groupPower.setGachaSwitch(Constants.COMMON_CONFIG.isGachaSwitch());
                 groupPower.setHorseSwitch(Constants.COMMON_CONFIG.isHorseSwitch());
+                groupPower.setHorseSwitch(Constants.COMMON_CONFIG.isDiceSwitch());
+                groupPower.setHorseSwitch(Constants.COMMON_CONFIG.isSetuSwitch());
                 GROUP_CONFIG_MAP.put(((GroupMsg) context.getMsgGet()).getGroupCode(), groupPower);
                 JSONUtils.setJson(GROUP_CONFIG_MAP);
                 return Constants.COMMON_CONFIG.isGlobalSwitch();
@@ -46,10 +61,23 @@ public class PCRIntercept implements MsgIntercept {
         return true;
     }
 
-    //是抽卡消息吗
     private boolean isChouKa(String msg) {
         return msg.startsWith("#十连") || msg.startsWith("#up十连") || msg.startsWith("#井")
                 || msg.startsWith("#up井") || msg.startsWith("#抽卡") || msg.startsWith("#up抽卡");
+    }
+
+    private boolean isHorse(String msg) {
+        return msg.startsWith("#赛") || msg.startsWith("#开始赛") || msg.startsWith("押马");
+    }
+
+    private boolean isDice(String msg) {
+        return msg.startsWith("#骰子") || msg.startsWith("骰子说明") || msg.startsWith("押骰子")
+                || msg.startsWith("#投掷骰子") || msg.startsWith("#豹？") || msg.startsWith("#roll");
+    }
+
+    private boolean isSetu(String msg) {
+        return msg.startsWith("叫车") || msg.startsWith("#抽奖") || msg.startsWith("#mjx")
+                || msg.contains("色图") || msg.contains("涩图");
     }
 
     public boolean isOpen(String msg) {

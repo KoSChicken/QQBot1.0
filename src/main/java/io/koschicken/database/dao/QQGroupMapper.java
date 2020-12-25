@@ -14,7 +14,10 @@ import java.util.List;
 @Repository
 @Mapper
 public interface QQGroupMapper extends BaseMapper<QQGroup> {
-    @Select("select s.* from scores s left join qq_group g on s.qq = g.qq where g.`group_code` = #{groupCode} order by s.score desc limit 10")
+    @Select("select s.* from scores s " +
+            "left join qq_group g on s.qq = g.qq " +
+            "where g.`group_code` = #{groupCode} " +
+            "order by s.score desc limit 10")
     List<Scores> rank(@Param("groupCode") String groupCode);
 
     @Select("select * from qq_group where qq = #{qq}")

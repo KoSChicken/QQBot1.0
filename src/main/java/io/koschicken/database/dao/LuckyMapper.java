@@ -12,7 +12,10 @@ import java.util.List;
 @Repository
 @Mapper
 public interface LuckyMapper extends BaseMapper<Lucky> {
-    @Select("select l.qq, count(l.qq) as 'count' from lucky l left join qq_group g on g.qq = l.qq where g.group_code = #{groupCode} group by l.qq order by count(l.qq) desc")
+    @Select("select l.qq, count(l.qq) as 'count' " +
+            "from lucky l left join qq_group g on g.qq = l.qq " +
+            "where g.group_code = #{groupCode} " +
+            "group by l.qq order by count(l.qq) desc")
     List<Lucky> list(@Param("groupCode") String groupCode);
 
     @Select("select * from lucky where qq = #{qq}")

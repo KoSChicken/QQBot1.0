@@ -7,6 +7,7 @@ public class GroupPower {
     private boolean horseSwitch;//赛马开关
     private boolean setuSwitch;//涩图开关
     private boolean diceSwitch;//骰子开关
+    private boolean lotterySwitch;//彩票开关
 
     public boolean isGlobalSwitch() {
         return globalSwitch;
@@ -62,6 +63,26 @@ public class GroupPower {
         return this;
     }
 
+    public boolean isLotterySwitch() {
+        return lotterySwitch;
+    }
+
+    public GroupPower setLotterySwitch(boolean lotterySwitch) {
+        this.lotterySwitch = lotterySwitch;
+        return this;
+    }
+
+    public GroupPower allSwitch(boolean b) {
+        setLotterySwitch(b);
+        setGlobalSwitch(b);
+        setDiceSwitch(b);
+        setGachaSwitch(b);
+        setHorseSwitch(b);
+        setMaiyaoSwitch(b);
+        setSetuSwitch(b);
+        return this;
+    }
+
     @Override
     public String toString() {
         return "GroupPower{" +
@@ -71,6 +92,7 @@ public class GroupPower {
                 ", horseSwitch=" + horseSwitch +
                 ", setuSwitch=" + setuSwitch +
                 ", diceSwitch=" + diceSwitch +
+                ", lotterySwitch=" + lotterySwitch +
                 '}';
     }
 }

@@ -36,7 +36,7 @@ public class Tixingmaiyao {
             }
             Set<String> groupSet = GROUP_CONFIG_MAP.keySet();
             for (String s : groupSet) {
-                if (GROUP_CONFIG_MAP.get(s).isMaiyaoSwitch()) {
+                if (GROUP_CONFIG_MAP.get(s).isGlobalSwitch() && GROUP_CONFIG_MAP.get(s).isMaiyaoSwitch()) {
                     msgSender.SENDER.sendGroupMsg(s, str);
                 }
             }

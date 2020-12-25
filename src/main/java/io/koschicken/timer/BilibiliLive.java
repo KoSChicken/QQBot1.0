@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Set;
 
 import static io.koschicken.listeners.BilibiliListener.LIVE_HASH_MAP;
+import static io.koschicken.listeners.intercept.PCRIntercept.GROUP_CONFIG_MAP;
 
 @Component
 @EnableScheduling
@@ -34,6 +35,8 @@ public class BilibiliLive {
 
     @Scheduled(cron = "0/30 * * * * ? ")
     public void execute() {
+        fetchLive();
+        LOGGER.info("当前有无监听的直播间：{}", LIVE_HASH_MAP.isEmpty() ? "无" : "有");
         Set<String> strings = LIVE_HASH_MAP.keySet();
         HashMap<String, Live> live = new HashMap<>();
         Live cache;
@@ -71,9 +74,28 @@ public class BilibiliLive {
             }
             if (stringBuilder.length() > 0) {
                 for (String groupCode : groupSet) {
-                    msgSender.SENDER.sendGroupMsg(groupCode, stringBuilder.toString());
+                    if (GROUP_CONFIG_MAP.get(groupCode).isGlobalSwitch()) {
+                        msgSender.SENDER.sendGroupMsg(groupCode, stringBuilder.toString());
+                    }
                 }
             }
+        }
+    }
+
+    private void fetchLive() {
+        List<io.koschicken.database.bean.Live> list = liveService.list();
+        if (list.isEmpty()) {
+            LIVE_HASH_MAP.clear();
+        } else {
+            list.forEach(live -> {
+                try {
+                    String biliUid = live.getBiliUid();
+                    Live biliLive = new Live(biliUid);
+                    LIVE_HASH_MAP.putIfAbsent(biliUid, biliLive);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
         }
     }
 }

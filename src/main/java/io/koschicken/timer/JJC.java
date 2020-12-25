@@ -27,7 +27,7 @@ public class JJC {
         BotSender msgSender = botManager.defaultBot().getSender();
         Set<String> strings = GROUP_CONFIG_MAP.keySet();
         for (String s : strings) {
-            if (GROUP_CONFIG_MAP.get(s).isMaiyaoSwitch()) {
+            if (GROUP_CONFIG_MAP.get(s).isGlobalSwitch() && GROUP_CONFIG_MAP.get(s).isMaiyaoSwitch()) {
                 msgSender.SENDER.sendGroupMsg(s, "该上号背刺了hxdm");
             }
         }
