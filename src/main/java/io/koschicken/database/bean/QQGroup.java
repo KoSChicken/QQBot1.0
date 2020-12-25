@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
 
 import java.io.Serializable;
 
+@Data
 @TableName("qq_group")
 public class QQGroup implements Serializable {
 
@@ -23,38 +25,5 @@ public class QQGroup implements Serializable {
     public QQGroup(String qq, String group) {
         this.qq = qq;
         groupCode = group;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getQq() {
-        return qq;
-    }
-
-    public void setQq(String qq) {
-        this.qq = qq;
-    }
-
-    public String getGroupCode() {
-        return groupCode;
-    }
-
-    public void setGroupCode(String groupCode) {
-        this.groupCode = groupCode;
-    }
-
-    @Override
-    public String toString() {
-        return "QQGroup{" +
-                "id=" + id +
-                ", qq='" + qq + '\'' +
-                ", group='" + groupCode + '\'' +
-                '}';
     }
 }

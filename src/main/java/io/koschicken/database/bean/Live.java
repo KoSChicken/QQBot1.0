@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
 
 import java.io.Serializable;
 
+@Data
 @TableName("live")
 public class Live implements Serializable {
 
@@ -23,38 +25,5 @@ public class Live implements Serializable {
     public Live(String qq, String biliUid) {
         this.qq = qq;
         this.biliUid = biliUid;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getQq() {
-        return qq;
-    }
-
-    public void setQq(String qq) {
-        this.qq = qq;
-    }
-
-    public String getBiliUid() {
-        return biliUid;
-    }
-
-    public void setBiliUid(String biliUid) {
-        this.biliUid = biliUid;
-    }
-
-    @Override
-    public String toString() {
-        return "Live{" +
-                "id=" + id +
-                ", qq='" + qq + '\'' +
-                ", biliUid='" + biliUid + '\'' +
-                '}';
     }
 }
