@@ -19,7 +19,7 @@ public class Scores implements Serializable {
     @TableField(value = "sign_flag")
     private Boolean signFlag;
 
-    private Integer score;
+    private Long score;
 
     @TableField(value = "live_flag")
     private Boolean liveFlag;
@@ -54,11 +54,11 @@ public class Scores implements Serializable {
         this.signFlag = signFlag;
     }
 
-    public Integer getScore() {
+    public Long getScore() {
         return score;
     }
 
-    public void setScore(Integer score) {
+    public void setScore(Long score) {
         this.score = score;
     }
 

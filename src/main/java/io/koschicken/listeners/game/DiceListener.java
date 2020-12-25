@@ -157,15 +157,15 @@ public class DiceListener {
         while (iterator.hasNext()) {
             Long entry = iterator.next();
             if (group.get(entry).get(0).equals(result)) {
-                Scores byId = scoresService.getById(entry);
-                double rate;
+                Scores scores = scoresService.getById(entry);
+                int rate;
                 if ("豹子".equals(result)) {
                     rate = RATE_B;
                 } else {
                     rate = RATE_N;
                 }
-                byId.setScore((int) (byId.getScore() + Integer.parseInt(group.get(entry).get(1)) * rate));
-                list.add(byId);
+                scores.setScore((scores.getScore() + Long.parseLong(group.get(entry).get(1)) * rate));
+                list.add(scores);
             }
         }
         scoresService.updateBatchById(list);
@@ -273,13 +273,13 @@ public class DiceListener {
         }
         while (!check && scores.getScore() >= 25) {
             i++;
-            int newScores = scores.getScore() - scores.getScore() / 25;
+            long newScores = scores.getScore() - scores.getScore() / 25L;
             scores.setScore(newScores);
             scoresService.updateById(scores);
             check = check(gameRoll());
             if (check) {
-                int max = (Integer.MAX_VALUE - 1) / 2;
-                newScores = scores.getScore() >= max ? Integer.MAX_VALUE : scores.getScore() * 2;
+                long max = (Long.MAX_VALUE - 1) / 2;
+                newScores = scores.getScore() >= max ? Long.MAX_VALUE : scores.getScore() * 2;
                 scores.setScore(newScores);
                 scoresService.updateById(scores);
                 sender.SENDER.sendGroupMsg(msg.getGroupCode(), CQ_AT + msg.getQQ() + "] 恭喜你，roll了" + i + "次，中了，余额：" + scores.getScore());

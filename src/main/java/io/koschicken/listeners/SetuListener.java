@@ -178,7 +178,7 @@ public class SetuListener {
         Scores scores = new Scores();
         scores.setSignFlag(false);
         scores.setQq(msg.getQQ());
-        scores.setScore(0);
+        scores.setScore(0L);
         scoresService.save(scores);
         sender.SENDER.sendGroupMsg(msg.getGroupCode(), CQ_AT + msg.getQQCode() + "]" + "你没钱了，请尝试签到或找开发者PY");
     }
@@ -304,7 +304,7 @@ public class SetuListener {
                         }
                         sendCount++;
                     }
-                    coin.setScore((int) (coin.getScore() - price * sendCount));
+                    coin.setScore((long) (coin.getScore() - price * sendCount));
                     scoresService.updateById(coin); // 按照实际发送的张数来扣除叫车者的币
                 } else {
                     if (StringUtils.isEmpty(groupCode)) {

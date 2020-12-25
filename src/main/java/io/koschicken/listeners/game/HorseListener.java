@@ -28,7 +28,7 @@ import static io.koschicken.constants.GameConstants.EMOJI_LIST;
 public class HorseListener {
 
     //赛马  群号->映射群员->映射押注对象号码 押注金额
-    private static final HashMap<String, Map<Long, int[]>> MA_LIST = new HashMap<>();
+    private static final HashMap<String, Map<Long, long[]>> MA_LIST = new HashMap<>();
     private static final HashMap<String, Integer> PROGRESS_LIST = new HashMap<>(); // 赛马进度
     private static final Logger LOGGER = LoggerFactory.getLogger(HorseListener.class);
 
@@ -108,10 +108,10 @@ public class HorseListener {
         if (MA_LIST.get(msg.getGroupCode()).get(msg.getCodeNumber()) != null) {
             sender.SENDER.sendGroupMsg(msg.getGroupCode(), "你已经下过注了");
         } else {
-            int[] integers = new int[2];
-            integers[0] = no - 1;
-            integers[1] = coin;
-            MA_LIST.get(msg.getGroupCode()).put(msg.getCodeNumber(), integers);
+            long[] value = new long[2];
+            value[0] = no - 1L;
+            value[1] = coin;
+            MA_LIST.get(msg.getGroupCode()).put(msg.getCodeNumber(), value);
             sender.SENDER.sendGroupMsg(msg.getGroupCode(), "下注完成 加油啊" + no + "号");
         }
         int size = MA_LIST.get(msg.getGroupCode()).size();
@@ -140,15 +140,15 @@ public class HorseListener {
     }
 
     public void allClear(String groupQQ, int winner) {
-        Map<Long, int[]> group = MA_LIST.get(groupQQ);
+        Map<Long, long[]> group = MA_LIST.get(groupQQ);
         Iterator<Long> iterator = group.keySet().iterator();
         List<Scores> list = new ArrayList<>();
         while (iterator.hasNext()) {
             Long entry = iterator.next();
             if (group.get(entry)[0] == winner) {
-                Scores byId = scoresService.getById(entry);
-                byId.setScore((int) (byId.getScore() + group.get(entry)[1] * 1.5));
-                list.add(byId);
+                Scores scores = scoresService.getById(entry);
+                scores.setScore((long) (scores.getScore() + group.get(entry)[1] * 1.5));
+                list.add(scores);
             } else {
                 Scores byId = scoresService.getById(entry);
                 byId.setScore(byId.getScore() - group.get(entry)[1]);
@@ -204,10 +204,10 @@ public class HorseListener {
         }
 
         private StringBuilder getWinners() {
-            Map<Long, int[]> map = MA_LIST.get(groupQQ); // int[0]->马的编号 int[1]->钱
+            Map<Long, long[]> map = MA_LIST.get(groupQQ); // int[0]->马的编号 int[1]->钱
             List<Long> winner = new ArrayList<>();
             map.forEach((qq, value) -> {
-                int[] intArray = map.get(qq);
+                long[] intArray = map.get(qq);
                 if (Arrays.binarySearch(intArray, winnerHorse) >= 0) {
                     winner.add(qq);
                 }

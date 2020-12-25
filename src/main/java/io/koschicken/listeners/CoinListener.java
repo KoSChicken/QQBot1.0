@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 @Component
 public class CoinListener {
 
-    public static final int SIGN_SCORE = 5000;
+    public static final long SIGN_SCORE = 5000;
     private static final Logger LOGGER = LoggerFactory.getLogger(CoinListener.class);
 
     @Autowired
