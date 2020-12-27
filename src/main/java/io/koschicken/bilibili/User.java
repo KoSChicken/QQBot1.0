@@ -8,6 +8,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -103,23 +104,24 @@ public class User {
     public void fresh() throws IOException {
         String user = getUser(mid);
         JSONObject jsonObject = JSON.parseObject(user);
-        JSONObject data = jsonObject.getJSONObject("data");
+        if (Objects.nonNull(jsonObject)) {
+            JSONObject data = jsonObject.getJSONObject("data");
+            uname = data.getString("name");
+            JSONObject liveRoom = data.getJSONObject("liveRoom");
+            if (liveRoom != null) {
+                roomId = liveRoom.getInteger("roomid");
+            }
+            sign = data.getString("sign");
 
-        uname = data.getString("name");
-        JSONObject liveRoom = data.getJSONObject("liveRoom");
-        if (liveRoom != null) {
-            roomId = liveRoom.getInteger("roomid");
-        }
-        sign = data.getString("sign");
-
-        String fileName = getImageName(data.getString("face"));
-        if (face == null || face.getName().equals(fileName)) {
-            face = new File(TEMP + fileName);
-            FileUtils.forceMkdir(face.getParentFile());
-            FileUtils.deleteQuietly(face);
-            FileUtils.touch(face);
-            URL imageUrl = new URL(data.getString("face"));
-            FileUtils.copyURLToFile(imageUrl, face);
+            String fileName = getImageName(data.getString("face"));
+            if (face == null || face.getName().equals(fileName)) {
+                face = new File(TEMP + fileName);
+                FileUtils.forceMkdir(face.getParentFile());
+                FileUtils.deleteQuietly(face);
+                FileUtils.touch(face);
+                URL imageUrl = new URL(data.getString("face"));
+                FileUtils.copyURLToFile(imageUrl, face);
+            }
         }
     }
 

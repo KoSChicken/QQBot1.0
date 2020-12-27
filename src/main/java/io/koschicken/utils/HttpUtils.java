@@ -5,6 +5,8 @@ import org.apache.http.client.fluent.Request;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -19,6 +21,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class HttpUtils {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpUtils.class);
 
     private HttpUtils() {
     }
@@ -56,7 +60,7 @@ public final class HttpUtils {
             //断开连接
             httpUrlConn.disconnect();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("http request fail");
         }
         //返回字符串
         return buffer.toString();
@@ -94,7 +98,7 @@ public final class HttpUtils {
             //断开连接
             httpUrlConn.disconnect();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("http request fail");
         }
         //返回字符串
         return buffer.toString();
