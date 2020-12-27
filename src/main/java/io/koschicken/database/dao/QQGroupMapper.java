@@ -5,7 +5,6 @@ import io.koschicken.database.bean.QQGroup;
 import io.koschicken.database.bean.Scores;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
@@ -18,7 +17,7 @@ public interface QQGroupMapper extends BaseMapper<QQGroup> {
             "left join qq_group g on s.qq = g.qq " +
             "where g.`group_code` = #{groupCode} " +
             "order by s.score desc limit 10")
-    List<Scores> rank(@Param("groupCode") String groupCode);
+    List<Scores> rank(String groupCode);
 
     @Select("select * from qq_group where qq = #{qq}")
     List<QQGroup> findByQQ(String qq);
