@@ -25,6 +25,16 @@ public class Lucky implements Serializable {
 
     private Integer count;
 
+    public Lucky(Integer id, Long qq) {
+        this.id = id;
+        this.qq = qq;
+    }
+
+    public Lucky(Long qq, Integer count) {
+        this.qq = qq;
+        this.count = count;
+    }
+
     public Lucky(Long qq, Date date, Integer coin) {
         this.qq = qq;
         this.date = date;
