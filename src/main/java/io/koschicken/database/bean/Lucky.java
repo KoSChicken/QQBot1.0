@@ -30,4 +30,12 @@ public class Lucky implements Serializable {
         this.date = date;
         this.coin = coin;
     }
+
+    public Lucky(Integer id, Long qq, Date date, Integer coin, Integer count) {
+        this.id = id;
+        this.qq = qq;
+        this.date = date;
+        this.coin = coin;
+        this.count = count;
+    }
 }
