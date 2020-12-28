@@ -148,7 +148,7 @@ public class SetuListener {
         sender.SENDER.sendGroupMsg(groupCode, image);
     }
 
-    @Limit(CD)
+    @Limit(CD * 6)
     @Listen(MsgGetTypes.groupMsg)
     @Filter(value = "#mjx")
     public void mjx(GroupMsg msg, MsgSender sender) throws IOException {
