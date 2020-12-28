@@ -12,6 +12,7 @@ public class BVAVUtils {
     static int[] ss = {11, 10, 3, 8, 4, 6, 2, 9, 5, 7};
     static long xor = 177451812;
     static long add = 8728348608L;
+
     private BVAVUtils() {
     }
 

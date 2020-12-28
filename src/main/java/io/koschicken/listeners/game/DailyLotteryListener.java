@@ -33,6 +33,7 @@ public class DailyLotteryListener {
 
     private static final Long DEFAULT_REWARD = 1000000L;
     private static final Map<Long, String> rewardMap = new HashMap<>();
+
     static {
         rewardMap.put(100000L, "二等奖");
         rewardMap.put(10000L, "三等奖");

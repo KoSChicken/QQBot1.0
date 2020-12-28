@@ -28,14 +28,6 @@ public class MiraiSpringBootBeanFactoryApp implements MiraiApp {
         this.dependGetter = dependGetter;
     }
 
-    @Override
-    public void before(MiraiConfiguration configuration) {
-        // 整合Spring的DependGetter
-        configuration.setDependGetter(dependGetter);
-        // 检查Bot配置，主要是用户名和密码
-        checkBotConfig(configuration);
-    }
-
     private static void checkBotConfig(MiraiConfiguration configuration) {
         Properties properties = new Properties();
         writeBotConfig(properties, configuration);
@@ -88,16 +80,24 @@ public class MiraiSpringBootBeanFactoryApp implements MiraiApp {
         configuration.registerBot(code, path);
     }
 
-    @Override
-    public void after(CQCodeUtil cqCodeUtil, MsgSender sender) {
-        InitConfig.initConfigs();
-    }
-
     private static String createConfigDir() throws IOException {
         File file = new File("config");
         if (!file.exists()) {
             FileUtils.forceMkdir(file);
         }
         return file.getAbsolutePath();
+    }
+
+    @Override
+    public void before(MiraiConfiguration configuration) {
+        // 整合Spring的DependGetter
+        configuration.setDependGetter(dependGetter);
+        // 检查Bot配置，主要是用户名和密码
+        checkBotConfig(configuration);
+    }
+
+    @Override
+    public void after(CQCodeUtil cqCodeUtil, MsgSender sender) {
+        InitConfig.initConfigs();
     }
 }

@@ -113,10 +113,9 @@ public class MiniCactpotListener {
         public void run() {
             final BotSender sender = botManager.defaultBot().getSender();
             // 初始化九宫格
-            List<Integer> game = Arrays.asList(1,2,3,4,5,6,7,8,9);
+            List<Integer> game = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9);
             Collections.shuffle(game);
             progressMap.put(groupQQ, true);
-
         }
     }
 }

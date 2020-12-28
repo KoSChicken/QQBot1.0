@@ -5,6 +5,7 @@ import com.forte.qqrobot.anno.Listen;
 import com.forte.qqrobot.beans.messages.msgget.GroupMsg;
 import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
 import com.forte.qqrobot.sender.MsgSender;
+import com.forte.qqrobot.system.limit.Limit;
 import com.simplerobot.modules.utils.KQCodeUtils;
 import io.koschicken.bean.Pixiv;
 import io.koschicken.constants.Constants;
@@ -27,7 +28,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -51,8 +51,6 @@ public class SetuListener {
     private static final String UA_STRING = "Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3";
     private static final int CD = 20;
     private static final HashMap<String, Integer> NUMBER;
-    private static HashMap<String, HashMap<String, LocalDateTime>> coolDown;
-    private final KQCodeUtils kqCodeUtils = KQCodeUtils.getInstance();
 
     static {
         NUMBER = new HashMap<>();
@@ -82,60 +80,58 @@ public class SetuListener {
         }
     }
 
+    private final KQCodeUtils kqCodeUtils = KQCodeUtils.getInstance();
+
     @Autowired
     private ScoresService scoresService;
 
     @Value("${setu.price}")
     private double price;
 
+    @Limit(CD)
     @Listen(MsgGetTypes.groupMsg)
     @Filter(value = {"叫车(.*)(.*)?(|r18)", "来(.*?)[点丶份张幅](.*?)的?(|r18)[色瑟涩][图圖]"})
     public void driver(GroupMsg msg, MsgSender sender) {
-        if (isCool(msg.getQQ(), msg.getGroupCode())) {
-            Scores coin = scoresService.getById(msg.getCodeNumber());
-            if (coin == null) {
-                createScore(msg, sender);
-            } else {
-                if (coin.getScore() >= price) {
-                    String message = msg.getMsg();
-                    String regex = message.startsWith("叫车") ? "叫车(.*)(.*)?(|r18)" : "来(.*?)[点丶份张幅](.*?)的?(|r18)[色瑟涩][图圖]";
-                    Pattern p = Pattern.compile(regex);
-                    Matcher m = p.matcher(message);
-                    int num = 1;
-                    String tag = "";
-                    boolean r18 = false;
-                    String number;
-                    while (m.find()) {
-                        // 兼容原有的叫车功能
-                        if (message.startsWith("叫车")) {
-                            number = m.group(2).trim();
-                            tag = m.group(1).trim();
-                        } else {
-                            number = m.group(1).trim();
-                            tag = m.group(2).trim();
-                        }
-                        try {
-                            num = NUMBER.get(number) == null ? Integer.parseInt(number) : NUMBER.get(number);
-                        } catch (NumberFormatException ignore) {
-                            LOGGER.info("number set to 1");
-                        }
-                        r18 = !StringUtils.isEmpty(m.group(3).trim());
-                    }
-                    // 发图
-                    Long qq = scoresService.findQQByNickname(tag);
-                    if (qq != null) {
-                        groupMember(msg, sender, qq);
-                    } else {
-                        SendSetu sendSetu = new SendSetu(msg.getGroupCode(), msg.getQQ(), sender, tag, num, r18, coin, scoresService);
-                        sendSetu.start();
-                        refreshCooldown(msg.getQQ(), msg.getGroupCode());
-                    }
-                } else {
-                    sender.SENDER.sendGroupMsg(msg.getGroupCode(), CQ_AT + msg.getQQCode() + "]" + "你没钱了，请尝试签到或找开发者PY");
-                }
-            }
+        Scores coin = scoresService.getById(msg.getCodeNumber());
+        if (coin == null) {
+            createScore(msg, sender);
         } else {
-            sender.SENDER.sendGroupMsg(msg.getGroupCode(), "叫车CD中...");
+            if (coin.getScore() >= price) {
+                String message = msg.getMsg();
+                String regex = message.startsWith("叫车") ? "叫车(.*)(.*)?(|r18)" : "来(.*?)[点丶份张幅](.*?)的?(|r18)[色瑟涩][图圖]";
+                Pattern p = Pattern.compile(regex);
+                Matcher m = p.matcher(message);
+                int num = 1;
+                String tag = "";
+                boolean r18 = false;
+                String number;
+                while (m.find()) {
+                    // 兼容原有的叫车功能
+                    if (message.startsWith("叫车")) {
+                        number = m.group(2).trim();
+                        tag = m.group(1).trim();
+                    } else {
+                        number = m.group(1).trim();
+                        tag = m.group(2).trim();
+                    }
+                    try {
+                        num = NUMBER.get(number) == null ? Integer.parseInt(number) : NUMBER.get(number);
+                    } catch (NumberFormatException ignore) {
+                        LOGGER.info("number set to 1");
+                    }
+                    r18 = !StringUtils.isEmpty(m.group(3).trim());
+                }
+                // 发图
+                Long qq = scoresService.findQQByNickname(tag);
+                if (qq != null) {
+                    groupMember(msg, sender, qq);
+                } else {
+                    SendSetu sendSetu = new SendSetu(msg.getGroupCode(), msg.getQQ(), sender, tag, num, r18, coin, scoresService);
+                    sendSetu.start();
+                }
+            } else {
+                sender.SENDER.sendGroupMsg(msg.getGroupCode(), CQ_AT + msg.getQQCode() + "]" + "你没钱了，请尝试签到或找开发者PY");
+            }
         }
     }
 
@@ -143,35 +139,28 @@ public class SetuListener {
     @Filter(value = "#抽奖")
     public void luck(GroupMsg msg, MsgSender sender) throws IOException {
         String groupCode = msg.getGroupCode();
-        if (isCool(msg.getQQ(), groupCode)) {
-            HttpResponse httpResponse = Request.Get(AWSL).addHeader(UA, UA_STRING).execute().returnResponse();
-            InputStream content = httpResponse.getEntity().getContent();
-            String uuid = UUID.randomUUID().toString();
-            Path path = Paths.get(TEMP + uuid + ".jpg");
-            Files.copy(content, path);
-            String image = kqCodeUtils.toCq(Constants.cqType.IMAGE, Constants.cqPrefix.FILE + path.toAbsolutePath());
-            sender.SENDER.sendGroupMsg(groupCode, image);
-        } else {
-            sender.SENDER.sendGroupMsg(groupCode, "CD中...");
-        }
+        HttpResponse httpResponse = Request.Get(AWSL).addHeader(UA, UA_STRING).execute().returnResponse();
+        InputStream content = httpResponse.getEntity().getContent();
+        String uuid = UUID.randomUUID().toString();
+        Path path = Paths.get(TEMP + uuid + ".jpg");
+        Files.copy(content, path);
+        String image = kqCodeUtils.toCq(Constants.cqType.IMAGE, Constants.cqPrefix.FILE + path.toAbsolutePath());
+        sender.SENDER.sendGroupMsg(groupCode, image);
     }
 
+    @Limit(CD)
     @Listen(MsgGetTypes.groupMsg)
     @Filter(value = "#mjx")
     public void mjx(GroupMsg msg, MsgSender sender) throws IOException {
         String groupCode = msg.getGroupCode();
-        if (isCool(msg.getQQ(), groupCode)) {
-            InputStream content = Request.Get(MJX)
-                    .setHeader(UA, UA_STRING)
-                    .execute().returnResponse().getEntity().getContent();
-            String uuid = UUID.randomUUID().toString();
-            Path path = Paths.get(TEMP + uuid + ".jpg");
-            Files.copy(content, path);
-            String image = kqCodeUtils.toCq(Constants.cqType.IMAGE, Constants.cqPrefix.FILE + path.toAbsolutePath());
-            sender.SENDER.sendGroupMsg(groupCode, image);
-        } else {
-            sender.SENDER.sendGroupMsg(groupCode, "CD中...");
-        }
+        InputStream content = Request.Get(MJX)
+                .setHeader(UA, UA_STRING)
+                .execute().returnResponse().getEntity().getContent();
+        String uuid = UUID.randomUUID().toString();
+        Path path = Paths.get(TEMP + uuid + ".jpg");
+        Files.copy(content, path);
+        String image = kqCodeUtils.toCq(Constants.cqType.IMAGE, Constants.cqPrefix.FILE + path.toAbsolutePath());
+        sender.SENDER.sendGroupMsg(groupCode, image);
     }
 
     private void createScore(GroupMsg msg, MsgSender sender) {
@@ -195,44 +184,6 @@ public class SetuListener {
             FileUtils.deleteQuietly(pic);
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    /**
-     * 刷新冷却时间
-     */
-    private void refreshCooldown(String qq, String groupCode) {
-        LocalDateTime localDateTime = LocalDateTime.now();
-        if (coolDown == null) {
-            coolDown = new HashMap<>();
-        }
-        HashMap<String, LocalDateTime> hashMap = coolDown.get(groupCode);
-        if (hashMap == null) {
-            hashMap = new HashMap<>();
-        }
-        hashMap.put(qq, localDateTime.plusSeconds(CD));
-        coolDown.put(groupCode, hashMap);
-    }
-
-    /**
-     * 获取冷却时间是不是到了
-     */
-    private boolean isCool(String qq, String groupCode) {
-        if (coolDown == null) {
-            coolDown = new HashMap<>();
-            return true;
-        } else {
-            HashMap<String, LocalDateTime> hashMap = coolDown.get(groupCode);
-            if (hashMap != null) {
-                LocalDateTime localDateTime = hashMap.get(qq);
-                if (localDateTime != null) {
-                    return localDateTime.isBefore(LocalDateTime.now());
-                } else {
-                    return true;
-                }
-            } else {
-                return true;
-            }
         }
     }
 

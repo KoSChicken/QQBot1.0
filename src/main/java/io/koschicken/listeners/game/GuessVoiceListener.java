@@ -24,7 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static io.koschicken.constants.Constants.CQ_AT;
@@ -55,7 +58,7 @@ public class GuessVoiceListener {
     public void cygamesHelp(GroupMsg msg, MsgSender sender) {
         sender.SENDER.sendGroupMsg(msg.getGroupCode(),
                 "#cygames 创建游戏；\nbot会发送一句语音；\n输入!+名字（如!日和）；\n当有人答对时游戏结束。\n" +
-                "输入#cygames-hint，可以获取提示，提示次数限制为3次，第一次提示种族，第二次提示名字长度，最后一次提示所属公会。");
+                        "输入#cygames-hint，可以获取提示，提示次数限制为3次，第一次提示种族，第二次提示名字长度，最后一次提示所属公会。");
     }
 
     @Listen(MsgGetTypes.groupMsg)
