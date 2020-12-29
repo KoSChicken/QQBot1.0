@@ -59,11 +59,11 @@ public class BilibiliLive {
         List<io.koschicken.database.bean.Live> list = liveService.list();
         Set<String> uidSet = new HashSet<>();
         list.forEach(l -> uidSet.add(l.getBiliUid()));
-        StringBuilder stringBuilder = new StringBuilder();
-        sendMsg(live, msgSender, uidSet, stringBuilder);
+        sendMsg(live, msgSender, uidSet);
     }
 
-    private void sendMsg(HashMap<String, Live> live, BotSender msgSender, Set<String> uidSet, StringBuilder stringBuilder) {
+    private void sendMsg(HashMap<String, Live> live, BotSender msgSender, Set<String> uidSet) {
+        StringBuilder stringBuilder = new StringBuilder();
         for (String uid : uidSet) {
             stringBuilder.delete(0, stringBuilder.length());
             String up = "\nUP：";
