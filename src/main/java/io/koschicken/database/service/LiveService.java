@@ -8,6 +8,8 @@ import java.util.List;
 public interface LiveService extends IService<Live> {
     List<Live> findByQQ(String qq);
 
+    Live findOne(String qq, String biliUid);
+
     void deleteOne(String qq, String biliUid);
 
     List<String> findGroupByUid(String biliUid);

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -123,15 +124,32 @@ public class BilibiliListener {
     public void setLive(PrivateMsg msg, MsgSender sender) {
         Pattern pattern = Pattern.compile("[0-9.]");
         Matcher matcher = pattern.matcher(msg.getMsg());
-        StringBuilder sb = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
         while (matcher.find()) {
-            sb.append(matcher.group(0));
+            stringBuilder.append(matcher.group(0));
         }
-        String biliUid = sb.toString();
-        liveService.save(new io.koschicken.database.bean.Live(msg.getQQ(), biliUid));
-        sender.SENDER.sendPrivateMsg(msg, "已添加" + sb + "的开播提示");
-        //开始监听直播间
-        addLive(biliUid);
+        String biliUid = stringBuilder.toString();
+        String qq = msg.getQQ();
+        io.koschicken.database.bean.Live live = liveService.findOne(qq, biliUid);
+        if (Objects.isNull(live)) {
+            liveService.save(new io.koschicken.database.bean.Live(qq, biliUid));
+            sender.SENDER.sendPrivateMsg(msg, "已添加" + stringBuilder + "的开播提示");
+            if (liveFlag(qq)) {
+                //开始监听直播间
+                addLive(biliUid);
+            }
+        } else {
+            sender.SENDER.sendPrivateMsg(msg, "已经关注过" + stringBuilder + "了");
+        }
+    }
+
+    private boolean liveFlag(String qq) {
+        Scores scores = scoresService.getById(qq);
+        if (scores == null) {
+            return false;
+        } else {
+            return scores.getLiveFlag();
+        }
     }
 
     @Listen(MsgGetTypes.privateMsg)
@@ -151,10 +169,13 @@ public class BilibiliListener {
             sender.SENDER.sendPrivateMsg(msg, "还没有关注的主播哦");
         } else {
             StringBuilder sb = new StringBuilder();
-            sb.append("开启状态:").append(scores.getLiveFlag());
+            sb.append("开启状态:").append(Boolean.TRUE.equals(scores.getLiveFlag()) ? "开启" : "关闭").append("\n");
             List<io.koschicken.database.bean.Live> liveList = liveService.findByQQ(qq);
-            for (io.koschicken.database.bean.Live live : liveList) {
-                sb.append(live.getBiliUid()).append(", ");
+            if (!liveList.isEmpty()) {
+                sb.append("已关注列表：");
+                for (io.koschicken.database.bean.Live live : liveList) {
+                    sb.append(live.getBiliUid()).append(", ");
+                }
             }
             sender.SENDER.sendPrivateMsg(msg, sb.substring(0, sb.length() - 2));
         }

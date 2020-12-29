@@ -21,6 +21,11 @@ public class LiveServiceImpl extends ServiceImpl<LiveMapper, Live> implements Li
     }
 
     @Override
+    public Live findOne(String qq, String biliUid) {
+        return liveMapper.findOne(qq, biliUid);
+    }
+
+    @Override
     public void deleteOne(String qq, String biliUid) {
         liveMapper.deleteOne(qq, biliUid);
     }
