@@ -13,7 +13,7 @@ import java.util.List;
 public interface LotteryBetMapper extends BaseMapper<LotteryBet> {
 
     @Select("select * from lottery_bet " +
-            "where date((create_time / 1000), 'unixepoch', 'localtime') = date(CURRENT_TIMESTAMP,'localtime') " +
+            "where date((create_time / 1000), 'unixepoch', 'localtime') = date(CURRENT_TIMESTAMP, '-1 day', 'localtime') " +
             "and group_code = #{groupCode}")
     List<LotteryBet> listToday(String groupCode);
 
