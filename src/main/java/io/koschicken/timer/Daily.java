@@ -106,14 +106,17 @@ public class Daily {
                 List<LotteryBet> lottery = lotteryBetService.listToday(groupCode);
                 Long currentReward = today.getCurrentReward();
                 if (lottery.isEmpty()) {
-                    stringBuilder.append("无人中奖，很遗憾，奖金将累计到下次开奖");
-                    newLottery.setCurrentReward(currentReward + DEFAULT_REWARD); // 新的奖金为上期累计奖金+起始奖金
+                    stringBuilder.append("本次彩票无人购买");
                 } else {
-                    stringBuilder.append("本次中奖名单\n");
                     Map<String, Long> winnerMap = getWinnerMap(result, lottery, currentReward);
-                    currentReward = announceWinner(sender, groupCode, stringBuilder, currentReward, winnerMap);
-                    newLottery.setCurrentReward(currentReward);
+                    if (!winnerMap.isEmpty()) {
+                        stringBuilder.append("本次中奖名单\n");
+                        currentReward = announceWinner(sender, groupCode, stringBuilder, currentReward, winnerMap);
+                    } else {
+                        stringBuilder.append("无人中奖，很遗憾，奖金将累计到下次开奖");
+                    }
                 }
+                newLottery.setCurrentReward(currentReward + DEFAULT_REWARD); // 新的奖金为上期累计奖金+起始奖金
                 sender.SENDER.sendGroupMsg(groupCode, stringBuilder.toString());
             } else {
                 newLottery.setCurrentReward(DEFAULT_REWARD); // 起始奖金
