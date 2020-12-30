@@ -37,7 +37,7 @@ public class BilibiliLive {
     @Scheduled(cron = "0/30 * * * * ? ")
     public void execute() {
         fetchLive();
-        LOGGER.info("当前监听的直播间：{}", LIVE_HASH_MAP.isEmpty() ? "无" : printMap());
+        LOGGER.info("当前监听的直播间：\n{}", LIVE_HASH_MAP.isEmpty() ? "无" : printMap());
         Set<String> strings = LIVE_HASH_MAP.keySet();
         HashMap<String, Live> live = new HashMap<>();
         Live cache;
