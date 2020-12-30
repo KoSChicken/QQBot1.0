@@ -37,7 +37,7 @@ public class BilibiliLive {
     @Scheduled(cron = "0/30 * * * * ? ")
     public void execute() {
         fetchLive();
-        LOGGER.info("当前监听的直播间：{}", LIVE_HASH_MAP.isEmpty() ? "无" : printMap(LIVE_HASH_MAP));
+        LOGGER.info("当前监听的直播间：\n{}", LIVE_HASH_MAP.isEmpty() ? "无" : printMap());
         Set<String> strings = LIVE_HASH_MAP.keySet();
         HashMap<String, Live> live = new HashMap<>();
         Live cache;
@@ -92,6 +92,7 @@ public class BilibiliLive {
         if (list.isEmpty()) {
             LIVE_HASH_MAP.clear();
         } else {
+            LIVE_HASH_MAP.clear();
             list.forEach(live -> {
                 try {
                     if (liveFlag(live.getQq())) {
@@ -106,9 +107,9 @@ public class BilibiliLive {
         }
     }
 
-    private String printMap(Map<String, Live> map) {
+    private String printMap() {
         StringBuilder sb = new StringBuilder();
-        map.forEach((k, v) -> sb.append("up：").append(v.getUser().getUname()).append("\n")
+        LIVE_HASH_MAP.forEach((k, v) -> sb.append("up：").append(v.getUser().getUname()).append("\n")
                 .append("标题：").append(v.getTitle()).append("\n")
                 .append("状态：").append(v.getLiveStatus() == 0 ? "未直播" : "直播中").append("\n"));
         return sb.toString();
