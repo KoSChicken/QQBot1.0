@@ -30,4 +30,6 @@ public interface ScoresService extends IService<Scores> {
     void cygamesWin(String qq);
 
     List<Scores> cygamesRank();
+
+    List<Scores> listByGroupCode(String code);
 }

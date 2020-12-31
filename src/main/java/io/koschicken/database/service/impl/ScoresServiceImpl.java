@@ -82,4 +82,9 @@ public class ScoresServiceImpl extends ServiceImpl<ScoresMapper, Scores> impleme
     public List<Scores> cygamesRank() {
         return scoresMapper.cygamesRank();
     }
+
+    @Override
+    public List<Scores> listByGroupCode(String code) {
+        return scoresMapper.listByGroupCode(code);
+    }
 }

@@ -32,7 +32,7 @@ public interface ScoresMapper extends BaseMapper<Scores> {
     @Update("update scores set sign_flag = true where qq = #{qq}")
     void sign(@Param("qq") String qq);
 
-    @Update("update scores set score = score + 10000")
+    @Update("update scores set score = score + 1000000")
     void allRich();
 
     @Update("update scores set score = score / 2 where qq = #{qq}")
@@ -49,4 +49,9 @@ public interface ScoresMapper extends BaseMapper<Scores> {
 
     @Select("select * from scores order by cygames_win desc")
     List<Scores> cygamesRank();
+
+    @Select("select s.* from scores s " +
+            "left join qq_group qg on s.qq = qg.qq " +
+            "where qg.group_code = #{code}")
+    List<Scores> listByGroupCode(String code);
 }

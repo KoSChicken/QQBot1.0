@@ -14,6 +14,7 @@ import io.koschicken.database.bean.Scores;
 import io.koschicken.database.service.LuckyService;
 import io.koschicken.database.service.QQGroupService;
 import io.koschicken.database.service.ScoresService;
+import io.koschicken.utils.Utils;
 import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,7 +124,7 @@ public class CoinListener {
         List<Scores> list = scoresService.rank(msg.getGroupCode());
         for (int i = 0; i < list.size(); i++) {
             GroupMemberInfo info = sender.GETTER.getGroupMemberInfo(msg.getGroupCode(), String.valueOf(list.get(i).getQq()));
-            sb.append(i + 1).append(". ").append(dealCard(info.getCard())).append(" 余额：").append(list.get(i).getScore()).append("\n");
+            sb.append(i + 1).append(". ").append(Utils.dealCard(info.getCard())).append("\t余额：").append(list.get(i).getScore()).append("\n");
         }
         sender.SENDER.sendGroupMsg(msg.getGroupCode(), sb.toString().trim());
     }
@@ -138,14 +139,10 @@ public class CoinListener {
         for (int i = 0; i < (Math.min(list.size(), 10)); i++) {
             Lucky lucky = list.get(i);
             GroupMemberInfo info = sender.GETTER.getGroupMemberInfo(msg.getGroupCode(), String.valueOf(lucky.getQq()));
-            sb.append(i + 1).append(". ").append(dealCard(info.getCard())).append(" 天选次数：").append(lucky.getCount()).append("\n");
+            sb.append(i + 1).append(". ").append(Utils.dealCard(info.getCard())).append("\t天选次数：").append(lucky.getCount()).append("\n");
         }
         sb.append("等").append(list.size()).append("位群友");
         sender.SENDER.sendGroupMsg(msg.getGroupCode(), sb.toString().trim());
-    }
-
-    private String dealCard(String card) {
-        return card.replace("怪物猎人辱华", "屏蔽字");
     }
 
     @Listen(MsgGetTypes.groupMsg)

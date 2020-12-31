@@ -12,6 +12,7 @@ import io.koschicken.database.service.LotteryBetService;
 import io.koschicken.database.service.LotteryService;
 import io.koschicken.database.service.QQGroupService;
 import io.koschicken.database.service.ScoresService;
+import io.koschicken.utils.Utils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.jetbrains.annotations.NotNull;
@@ -67,7 +68,7 @@ public class Daily {
         scoresService.clearSign(); // 重置签到
         scoresService.clearRoll(); // 重置roll
         clearTemp();
-        dailyLottery();
+        luckyDog();
     }
 
     private void clearTemp() throws IOException {
@@ -81,7 +82,20 @@ public class Daily {
         }
     }
 
-    private void dailyLottery() {
+    private void luckyDog() {
+        GROUP_CONFIG_MAP.forEach((code, power) -> {
+            List<Scores> list = scoresService.listByGroupCode(code);
+            Collections.shuffle(list);
+            Scores scores = list.get(0);
+            scores.setScore(scores.getScore() + DEFAULT_REWARD);
+            BotSender sender = botManager.defaultBot().getSender();
+            GroupMemberInfo info = sender.GETTER.getGroupMemberInfo(code, scores.getQq());
+            sender.SENDER.sendGroupMsg(code, "今日幸运儿是" + Utils.dealCard(info.getCard()) + "，币+" + DEFAULT_REWARD);
+        });
+    }
+
+    @Scheduled(cron = "0 5 0 * * ?")
+    public void dailyLottery() {
         BotSender sender = botManager.defaultBot().getSender();
         GROUP_CONFIG_MAP.forEach((code, power) -> {
             if (GROUP_CONFIG_MAP.get(code).isGlobalSwitch() && GROUP_CONFIG_MAP.get(code).isLotterySwitch()) {
