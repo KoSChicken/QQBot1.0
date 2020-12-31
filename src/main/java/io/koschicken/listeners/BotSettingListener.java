@@ -30,6 +30,12 @@ public class BotSettingListener {
     private ScoresService scoresService;
 
     @Listen(MsgGetTypes.groupMsg)
+    @Filter(value = {"wei,zaima?"}, keywordMatchType = KeywordMatchType.TRIM_EQUALS)
+    public void check(GroupMsg msg, MsgSender sender) {
+        sender.SENDER.sendGroupMsg(msg.getGroupCode(), "buzai,cmn");
+    }
+
+    @Listen(MsgGetTypes.groupMsg)
     @Filter(value = {"#启用Bot"}, keywordMatchType = KeywordMatchType.TRIM_EQUALS)
     public void enable(GroupMsg msg, MsgSender sender) {
         String qq = msg.getQQ();
