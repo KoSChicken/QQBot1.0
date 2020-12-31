@@ -146,7 +146,7 @@ public class Daily {
             currentReward = currentReward - winnerReward;
             if (index <= 10) {
                 GroupMemberInfo info = sender.GETTER.getGroupMemberInfo(groupCode, winner);
-                String rank = winnerReward > 100000L ? " 一等奖" : " " + rewardMap.get(winnerReward);
+                String rank = winnerReward >= 100000L ? " 一等奖" : " " + rewardMap.get(winnerReward);
                 stringBuilder.append(index).append(". ").append(info.getCard()).append(rank).append("，奖金：").append(winnerReward).append("\n");
                 index++;
             }
