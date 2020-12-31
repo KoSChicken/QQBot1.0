@@ -18,7 +18,7 @@ public interface LotteryBetMapper extends BaseMapper<LotteryBet> {
     List<LotteryBet> listToday(String groupCode);
 
     @Select("select * from lottery_bet where lottery = #{lottery} and group_code = #{groupCode} " +
-            "and create_time = date(CURRENT_TIMESTAMP,'localtime')")
+            "and date(create_time / 1000, 'unixepoch', 'localtime') = date(CURRENT_TIMESTAMP, 'localtime')")
     List<LotteryBet> lottery(String lottery, String groupCode);
 
     @Select("select * from lottery_bet where qq = #{qq} " +

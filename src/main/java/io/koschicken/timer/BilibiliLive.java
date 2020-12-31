@@ -109,8 +109,8 @@ public class BilibiliLive {
 
     private String printMap() {
         StringBuilder sb = new StringBuilder();
-        LIVE_HASH_MAP.forEach((k, v) -> sb.append("up：").append(v.getUser().getUname()).append("\n")
-                .append("标题：").append(v.getTitle()).append("\n")
+        LIVE_HASH_MAP.forEach((k, v) -> sb.append("up：").append(v.getUser().getUname()).append("\t")
+                .append("标题：").append(v.getTitle()).append("\t")
                 .append("状态：").append(v.getLiveStatus() == 0 ? "未直播" : "直播中").append("\n"));
         return sb.toString();
     }
