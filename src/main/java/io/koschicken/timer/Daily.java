@@ -88,6 +88,7 @@ public class Daily {
             Collections.shuffle(list);
             Scores scores = list.get(0);
             scores.setScore(scores.getScore() + DEFAULT_REWARD);
+            scoresService.updateById(scores);
             BotSender sender = botManager.defaultBot().getSender();
             GroupMemberInfo info = sender.GETTER.getGroupMemberInfo(code, scores.getQq());
             sender.SENDER.sendGroupMsg(code, "今日幸运儿是" + Utils.dealCard(info.getCard()) + "，币+" + DEFAULT_REWARD);
