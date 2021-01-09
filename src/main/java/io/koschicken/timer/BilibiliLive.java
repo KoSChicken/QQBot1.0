@@ -34,7 +34,7 @@ public class BilibiliLive {
     @Autowired
     BotManager botManager;
 
-    @Scheduled(cron = "0/30 * * * * ? ")
+    @Scheduled(cron = "0 * * * * ? *")
     public void execute() {
         fetchLive();
         LOGGER.info("当前监听的直播间：\n{}", LIVE_HASH_MAP.isEmpty() ? "无" : printMap());

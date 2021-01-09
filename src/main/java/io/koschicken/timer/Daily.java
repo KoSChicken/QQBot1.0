@@ -95,7 +95,7 @@ public class Daily {
         });
     }
 
-    @Scheduled(cron = "0 5 0 * * ?")
+    @Scheduled(cron = "0 2 0 * * ?")
     public void dailyLottery() {
         BotSender sender = botManager.defaultBot().getSender();
         GROUP_CONFIG_MAP.forEach((code, power) -> {
