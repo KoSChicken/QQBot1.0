@@ -212,7 +212,7 @@ public class BotSettingListener {
     }
 
     @Listen(MsgGetTypes.privateMsg)
-    @Filter(value = {"刷新全部签到"}, keywordMatchType = KeywordMatchType.TRIM_EQUALS)
+    @Filter(value = {"刷新签到"}, keywordMatchType = KeywordMatchType.TRIM_EQUALS)
     public void refreshSign(PrivateMsg msg, MsgSender sender) {
         String qq = msg.getQQ();
         if (qq.equals(COMMON_CONFIG.getMasterQQ())) {
