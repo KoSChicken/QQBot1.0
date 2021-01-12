@@ -72,5 +72,6 @@ $RECYCLE.BIN/
 *.lnk
 
 /temp/
-/config/
+/config/*
+!/config/gif
 *.db
