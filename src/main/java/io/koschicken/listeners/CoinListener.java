@@ -78,7 +78,7 @@ public class CoinListener {
             scores.setScore(SIGN_SCORE); // 第一次签到的仍然是5000
             scoresService.save(scores);
             qqGroupService.save(new QQGroup(qq, groupCode));
-            sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "] 签到成功，币+" + score);
+            sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "] 签到成功，币+" + SIGN_SCORE);
         }
     }
 
