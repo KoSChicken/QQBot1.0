@@ -19,4 +19,9 @@ public class LuckyServiceImpl extends ServiceImpl<LuckyMapper, Lucky> implements
     public List<Lucky> listByGroupCode(String groupCode) {
         return luckyMapper.list(groupCode);
     }
+
+    @Override
+    public List<Lucky> listByQQ(String qq) {
+        return luckyMapper.findByQQ(qq);
+    }
 }

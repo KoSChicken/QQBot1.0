@@ -235,20 +235,19 @@ public class DiceListener {
         return result;
     }
 
-    private boolean check(int[] arr) {
+    private boolean check(int[] arr, int max) {
         int valid = 0;
         for (int j : arr) {
-            if (j >= 7) {
+            if (j >= max) {
                 valid++;
             }
         }
-        return valid >= 7;
+        return valid >= max;
     }
 
     @Listen(MsgGetTypes.groupMsg)
     @Filter(value = {"#roll10d10w"})
     public void roll10D10W(GroupMsg msg, MsgSender sender) {
-        // sender.SENDER.sendGroupMsg(msg.getGroupCode(), "10d10w已被sbbot禁用");
         try {
             // 10d10，则进行金币翻倍判断
             Scores scores = scoresService.getById(msg.getQQ());
@@ -267,25 +266,37 @@ public class DiceListener {
     private void gameRoll10d10W(GroupMsg msg, MsgSender sender, Scores scores) {
         int i = 0;
         boolean check = false;
-        if (scores.getScore() < 25) {
+        Long score = scores.getScore();
+        if (score < 25) {
             sender.SENDER.sendGroupMsg(msg.getGroupCode(), CQ_AT + msg.getQQ() + "] 余额不足。");
             return;
         }
-        while (!check && scores.getScore() >= 25) {
+        int gameMax = getGameMax(score > Integer.MAX_VALUE, RandomUtils.nextInt(1, 10) >= 7 ? 8 : 7, 7);
+        while (!check && score >= 25) {
             i++;
-            long newScores = scores.getScore() - scores.getScore() / 25L;
+            long newScores = score - score / 25L;
             scores.setScore(newScores);
             scoresService.updateById(scores);
-            check = check(gameRoll());
+            check = check(gameRoll(), gameMax);
             if (check) {
                 long max = (Long.MAX_VALUE - 1) / 2;
-                newScores = scores.getScore() >= max ? Long.MAX_VALUE : scores.getScore() * 2;
+                newScores = score >= max ? Long.MAX_VALUE : score * 2;
                 scores.setScore(newScores);
                 scoresService.updateById(scores);
-                sender.SENDER.sendGroupMsg(msg.getGroupCode(), CQ_AT + msg.getQQ() + "] 恭喜你，roll了" + i + "次，中了，余额：" + scores.getScore());
+                sender.SENDER.sendGroupMsg(msg.getGroupCode(), CQ_AT + msg.getQQ() + "] 恭喜你，roll了" + i + "次，中了，余额：" + score);
                 break;
             }
         }
+    }
+
+    private int getGameMax(boolean b, int i2, int i3) {
+        int gameMax;
+        if (b) {
+            gameMax = i2;
+        } else {
+            gameMax = i3;
+        }
+        return gameMax;
     }
 
     public class Dice extends Thread {

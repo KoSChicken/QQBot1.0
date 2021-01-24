@@ -15,12 +15,14 @@ import io.koschicken.database.service.LuckyService;
 import io.koschicken.database.service.QQGroupService;
 import io.koschicken.database.service.ScoresService;
 import io.koschicken.utils.Utils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -32,6 +34,8 @@ public class CoinListener {
 
     public static final long SIGN_SCORE = 5000;
     private static final Logger LOGGER = LoggerFactory.getLogger(CoinListener.class);
+
+    private static final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
     @Autowired
     ScoresService scoresService;
@@ -143,6 +147,22 @@ public class CoinListener {
         }
         sb.append("等").append(list.size()).append("位群友");
         sender.SENDER.sendGroupMsg(msg.getGroupCode(), sb.toString().trim());
+    }
+
+    @Listen(MsgGetTypes.groupMsg)
+    @Filter(value = "#我的天选")
+    public void luckyListByQQ(GroupMsg msg, MsgSender sender) {
+        String qq = msg.getQQ();
+        List<Lucky> list = luckyService.listByQQ(qq);
+        int size = CollectionUtils.isNotEmpty(list) ? list.size() : 0;
+        StringBuilder sb = new StringBuilder();
+        sb.append(Constants.CQ_AT).append(qq).append("] 天选次数: ").append(size).append("次\n");
+        sb.append("最近3次天选记录：\n");
+        for (int i = 0; i < (Math.min(list.size(), 3)); i++) {
+            Lucky lucky = list.get(i);
+            sb.append(i + 1).append(". ").append("时间：").append(format.format(lucky.getDate())).append("\t金额：").append(lucky.getCoin()).append("\n");
+        }
+        sender.SENDER.sendGroupMsg(msg.getGroupCode(), sb.toString());
     }
 
     @Listen(MsgGetTypes.groupMsg)

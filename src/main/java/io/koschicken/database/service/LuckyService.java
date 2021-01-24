@@ -8,4 +8,6 @@ import java.util.List;
 public interface LuckyService extends IService<Lucky> {
 
     List<Lucky> listByGroupCode(String groupCode);
+
+    List<Lucky> listByQQ(String qq);
 }

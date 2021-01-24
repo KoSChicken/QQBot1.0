@@ -3,6 +3,7 @@ package io.koschicken.listeners;
 import com.forte.qqrobot.anno.Filter;
 import com.forte.qqrobot.anno.Listen;
 import com.forte.qqrobot.beans.messages.msgget.GroupMsg;
+import com.forte.qqrobot.beans.messages.result.GroupMemberInfo;
 import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
 import com.forte.qqrobot.beans.types.KeywordMatchType;
 import com.forte.qqrobot.sender.MsgSender;
@@ -121,7 +122,10 @@ public class PCRListener {
     }
 
     private void ban(GroupMsg msg, MsgSender sender, Gacha gacha) {
-        if (gacha.isBan()) {
+        GroupMemberInfo groupMemberInfo = sender.GETTER.getGroupMemberInfo(msg.getGroupCode(), sender.bot().getBotCode(), false);
+        boolean admin = groupMemberInfo.getPowerType().isAdmin();
+        boolean owner = groupMemberInfo.getPowerType().isOwner();
+        if (gacha.isBan() && (admin || owner)) {
             Integer ssrCount = gacha.getSsrCount();
             try {
                 long pow = (long) Math.pow(10, ssrCount - 1D);
@@ -131,7 +135,6 @@ public class PCRListener {
             } catch (Exception e) {
                 LOGGER.error(e.getMessage());
                 LOGGER.error("权限不足");
-                sender.SENDER.sendGroupMsg(msg.getGroupCode(), "好他妈气啊，ban不掉这个欧洲狗管理。");
             }
         }
     }

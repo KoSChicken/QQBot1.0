@@ -47,6 +47,9 @@ public class DailyLotteryListener {
     @Autowired
     LotteryBetService lotteryBetService;
 
+    @Autowired
+    Daily daily;
+
     @Listen(MsgGetTypes.groupMsg)
     @Filter(value = "#选彩票#.*")
     public void buy(GroupMsg msg, MsgSender sender) {
@@ -110,7 +113,6 @@ public class DailyLotteryListener {
         String groupCode = msg.getGroupCode();
         String qq = msg.getQQ();
         if (qq.equals(COMMON_CONFIG.getMasterQQ())) {
-            Daily daily = new Daily();
             daily.lottery(groupCode, sender);
         } else {
             sender.SENDER.sendGroupMsg(groupCode, "权限不足");

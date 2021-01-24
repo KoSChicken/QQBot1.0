@@ -18,6 +18,6 @@ public interface LuckyMapper extends BaseMapper<Lucky> {
             "group by l.qq order by count(l.qq) desc")
     List<Lucky> list(String groupCode);
 
-    @Select("select * from lucky where qq = #{qq}")
-    List<Lucky> findByQQ(@Param("qq") int qq);
+    @Select("select * from lucky where qq = #{qq} order by `date` desc")
+    List<Lucky> findByQQ(@Param("qq") String qq);
 }
