@@ -248,53 +248,53 @@ public class DiceListener {
     @Listen(MsgGetTypes.groupMsg)
     @Filter(value = {"#roll10d10w"})
     public void roll10D10W(GroupMsg msg, MsgSender sender) {
+        String groupCode = msg.getGroupCode();
         try {
-            // 10d10，则进行金币翻倍判断
             Scores scores = scoresService.getById(msg.getQQ());
             if (scores.getRollCount() > 0) {
                 scores.setRollCount(scores.getRollCount() - 1);
-                scoresService.updateById(scores);
                 gameRoll10d10W(msg, sender, scores);
             } else {
-                sender.SENDER.sendGroupMsg(msg.getGroupCode(), "次数已用尽");
+                sender.SENDER.sendGroupMsg(groupCode, "次数已用尽");
             }
         } catch (NumberFormatException e) {
-            sender.SENDER.sendGroupMsg(msg.getGroupCode(), "格式错误");
+            sender.SENDER.sendGroupMsg(groupCode, "炸了");
         }
     }
 
     private void gameRoll10d10W(GroupMsg msg, MsgSender sender, Scores scores) {
         int i = 0;
-        boolean check = false;
+        boolean check;
         Long score = scores.getScore();
+        String groupCode = msg.getGroupCode();
         if (score < 25) {
-            sender.SENDER.sendGroupMsg(msg.getGroupCode(), CQ_AT + msg.getQQ() + "] 余额不足。");
+            sender.SENDER.sendGroupMsg(groupCode, CQ_AT + msg.getQQ() + "] 余额不足。");
             return;
         }
-        int gameMax = getGameMax(score > Integer.MAX_VALUE, RandomUtils.nextInt(1, 10) >= 7 ? 8 : 7, 7);
-        while (!check && score >= 25) {
+        int gameMax = getGameMax(score > Integer.MAX_VALUE, RandomUtils.nextInt(1, 10) >= 8 ? 8 : 7);
+        while (true) {
             i++;
-            long newScores = score - score / 25L;
-            scores.setScore(newScores);
+            score = score - score / 25L;
+            scores.setScore(score);
             scoresService.updateById(scores);
             check = check(gameRoll(), gameMax);
-            if (check) {
-                long max = (Long.MAX_VALUE - 1) / 2;
-                newScores = score >= max ? Long.MAX_VALUE : score * 2;
-                scores.setScore(newScores);
+            if (check || i >= RandomUtils.nextInt(90, 161)) {
+                long max = (Long.MAX_VALUE - 1L) / 2L;
+                score = score >= max ? Long.MAX_VALUE : score * 2L;
+                scores.setScore(score);
                 scoresService.updateById(scores);
-                sender.SENDER.sendGroupMsg(msg.getGroupCode(), CQ_AT + msg.getQQ() + "] 恭喜你，roll了" + i + "次，中了，余额：" + score);
+                sender.SENDER.sendGroupMsg(groupCode, CQ_AT + msg.getQQ() + "] 恭喜你，roll了" + i + "次，中了，余额：" + score);
                 break;
             }
         }
     }
 
-    private int getGameMax(boolean b, int i2, int i3) {
+    private int getGameMax(boolean condition, int altMax) {
         int gameMax;
-        if (b) {
-            gameMax = i2;
+        if (condition) {
+            gameMax = altMax;
         } else {
-            gameMax = i3;
+            gameMax = 7;
         }
         return gameMax;
     }
