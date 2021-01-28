@@ -3,6 +3,8 @@ package io.koschicken.listeners;
 import com.forte.qqrobot.anno.Filter;
 import com.forte.qqrobot.anno.Listen;
 import com.forte.qqrobot.beans.messages.msgget.GroupMsg;
+import com.forte.qqrobot.beans.messages.result.GroupMemberList;
+import com.forte.qqrobot.beans.messages.result.inner.GroupMember;
 import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
 import com.forte.qqrobot.sender.MsgSender;
 import com.forte.qqrobot.system.limit.Limit;
@@ -122,13 +124,17 @@ public class SetuListener {
                     r18 = !StringUtils.isEmpty(m.group(3).trim());
                 }
                 // 发图
-                Long qq = scoresService.findQQByNickname(tag);
-                if (qq != null) {
-                    groupMember(msg, sender, qq);
-                } else {
-                    SendSetu sendSetu = new SendSetu(msg.getGroupCode(), msg.getQQ(), sender, tag, num, r18, coin, scoresService);
-                    sendSetu.start();
+                GroupMemberList groupMemberList = sender.GETTER.getGroupMemberList(msg.getGroup());
+                for (GroupMember member : groupMemberList) {
+                    String remarkOrNickname = member.getRemarkOrNickname().trim();
+                    if (Objects.equals(tag, remarkOrNickname)) {
+                        LOGGER.info("群名片：{}\ttag: {}", remarkOrNickname, tag);
+                        groupMember(msg, sender, member.getQQCode());
+                        return;
+                    }
                 }
+                SendSetu sendSetu = new SendSetu(msg.getGroupCode(), msg.getQQ(), sender, tag, num, r18, coin, scoresService);
+                sendSetu.start();
             } else {
                 sender.SENDER.sendGroupMsg(msg.getGroupCode(), CQ_AT + msg.getQQCode() + "]" + "你没钱了，请尝试签到或找开发者PY");
             }
@@ -172,7 +178,7 @@ public class SetuListener {
         sender.SENDER.sendGroupMsg(msg.getGroupCode(), CQ_AT + msg.getQQCode() + "]" + "你没钱了，请尝试签到或找开发者PY");
     }
 
-    private void groupMember(GroupMsg msg, MsgSender sender, Long qq) {
+    private void groupMember(GroupMsg msg, MsgSender sender, String qq) {
         String api = AVATAR_API + qq + "&s=640";
         try {
             InputStream imageStream = Request.Get(api).execute().returnResponse().getEntity().getContent();
