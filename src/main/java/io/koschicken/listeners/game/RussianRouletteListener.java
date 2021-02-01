@@ -64,6 +64,24 @@ public class RussianRouletteListener {
         }
     }
 
+    @Listen(MsgGetTypes.groupMsg)
+    @Filter(value = {"#R"})
+    public void endRoulette(GroupMsg msg, MsgSender sender) {
+        String qq = msg.getQQ();
+        String groupCode = msg.getGroupCode();
+        List<Boolean> bullets = gunMap.get(groupCode);
+        if (!CollectionUtils.isEmpty(bullets) && countBullets(bullets) == bullets.size()) {
+            clear(groupCode);
+            sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "] 扔掉手枪停止了游戏。");
+        } else {
+            if (bullets == null) {
+                sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "] 当前没有手枪。");
+            } else {
+                sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "] 游戏没有结束谁都不许下车。");
+            }
+        }
+    }
+
     private String printBullets(List<Boolean> list) {
         StringBuilder sb = new StringBuilder();
         list.forEach(b -> sb.append(b).append(" "));
@@ -113,14 +131,18 @@ public class RussianRouletteListener {
             shotCount = 0;
         }
         String message;
+        Scores score = scoresService.getById(qq);
+        if (score == null) {
+            sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "] 先签个到吧。");
+            return;
+        }
         if (Boolean.TRUE.equals(bullet)) {
             if (random < 996) {
                 bulletCount--;
                 bullets.remove(0);
                 message = Constants.CQ_AT + qq + "] 死了，币-" + (shotCount + 1) * 10000;
                 map.remove(qq);
-                Scores score = scoresService.getById(qq);
-                score.setScore(score.getScore() - ((shotCount + 1)  * 10000L) >= 0 ? score.getScore() - ((shotCount + 1)  * 10000L) : 0);
+                score.setScore(score.getScore() - ((shotCount + 1) * 10000L) >= 0 ? score.getScore() - ((shotCount + 1) * 10000L) : 0);
                 scoresService.updateById(score);
                 if (bulletCount > 0) {
                     deadList.add(qq);
@@ -135,14 +157,15 @@ public class RussianRouletteListener {
                 Collections.shuffle(bullets);
             }
         } else {
+            long rate = bullets.size() / (bullets.size() - bulletCount);
+            int reward = (int) Math.floor(10000D * rate);
             bullets.remove(0);
-            Scores score = scoresService.getById(qq);
-            score.setScore(Math.min(score.getScore() + 10000, Long.MAX_VALUE));
+            score.setScore(Math.min(score.getScore() + reward, Long.MAX_VALUE));
             scoresService.updateById(score);
             shotCount++;
             map.put(qq, shotCount);
             continuous.put(groupCode, map);
-            message = Constants.CQ_AT + qq + "] 安然无恙，币+10000，还有" + bulletCount + "颗子弹。";
+            message = Constants.CQ_AT + qq + "] 安然无恙，币+" + reward + "，还有" + bulletCount + "颗子弹。";
         }
         sender.SENDER.sendGroupMsg(groupCode, message);
     }
