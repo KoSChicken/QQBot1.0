@@ -19,17 +19,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
 public class BilibiliListener {
 
-    public static final Map<String, Live> LIVE_HASH_MAP = new HashMap<>();
+    public static final Map<String, Live> LIVE_HASH_MAP = new ConcurrentHashMap<>();
 
     @Autowired
     LiveService liveService;

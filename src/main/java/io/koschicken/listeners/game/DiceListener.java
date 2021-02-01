@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,9 +24,9 @@ import static io.koschicken.constants.Constants.CQ_AT;
 public class DiceListener {
 
     // 群号->映射群员->映射押注内容 押注金额
-    private static final HashMap<String, Map<Long, List<String>>> diceMap = new HashMap<>();
+    private static final Map<String, Map<Long, List<String>>> diceMap = new ConcurrentHashMap<>();
     private static final List<String> typeList;
-    private static final HashMap<String, Boolean> progressMap = new HashMap<>(); // 骰子游戏状态
+    private static final Map<String, Boolean> progressMap = new ConcurrentHashMap<>(); // 骰子游戏状态
     private static final int RATE_N = 2;
     private static final int RATE_B = 34;
 

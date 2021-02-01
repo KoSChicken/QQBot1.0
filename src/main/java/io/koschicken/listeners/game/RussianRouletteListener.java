@@ -18,13 +18,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class RussianRouletteListener {
 
-    private static final Map<String, List<Boolean>> gunMap = new HashMap<>();
-    private static final Map<String, List<String>> dead = new HashMap<>();
-    private static final Map<String, Map<String, Integer>> continuous = new HashMap<>();
+    private static final Map<String, List<Boolean>> gunMap = new ConcurrentHashMap<>();
+    private static final Map<String, List<String>> dead = new ConcurrentHashMap<>();
+    private static final Map<String, Map<String, Integer>> continuous = new ConcurrentHashMap<>();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RussianRouletteListener.class);
 

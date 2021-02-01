@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,8 +29,8 @@ import static io.koschicken.constants.GameConstants.EMOJI_LIST;
 public class HorseListener {
 
     //赛马  群号->映射群员->映射押注对象号码 押注金额
-    private static final HashMap<String, Map<Long, long[]>> MA_LIST = new HashMap<>();
-    private static final HashMap<String, Integer> PROGRESS_LIST = new HashMap<>(); // 赛马进度
+    private static final Map<String, Map<Long, long[]>> MA_LIST = new ConcurrentHashMap<>();
+    private static final Map<String, Integer> PROGRESS_LIST = new ConcurrentHashMap<>(); // 赛马进度
     private static final Logger LOGGER = LoggerFactory.getLogger(HorseListener.class);
 
     @Autowired

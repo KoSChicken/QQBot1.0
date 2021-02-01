@@ -19,7 +19,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.koschicken.constants.Constants.COMMON_CONFIG;
 
@@ -27,7 +31,7 @@ import static io.koschicken.constants.Constants.COMMON_CONFIG;
 public class DailyLotteryListener {
 
     private static final Long DEFAULT_REWARD = 1000000L;
-    private static final Map<Long, String> rewardMap = new HashMap<>();
+    private static final Map<Long, String> rewardMap = new ConcurrentHashMap<>();
 
     static {
         rewardMap.put(100000L, "二等奖");

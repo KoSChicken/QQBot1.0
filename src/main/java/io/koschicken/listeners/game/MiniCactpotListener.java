@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 一个写了一半放弃了的FF14仙人彩
@@ -25,10 +26,10 @@ import java.util.*;
 public class MiniCactpotListener {
 
     // 群号->映射群员->映射押注内容 押注金额
-    private static final Map<String, Map<String, List<String>>> gameMap = new HashMap<>();
-    private static final Map<String, List<Integer>> options = new HashMap<>();
+    private static final Map<String, Map<String, List<String>>> gameMap = new ConcurrentHashMap<>();
+    private static final Map<String, List<Integer>> options = new ConcurrentHashMap<>();
     private static final List<Integer> rewards = List.of(36, 720, 360, 80, 252, 108, 72, 54, 180, 72, 180, 119, 36, 306, 1080, 144, 1800, 3600);
-    private static final Map<String, Boolean> progressMap = new HashMap<>(); // 游戏状态
+    private static final Map<String, Boolean> progressMap = new ConcurrentHashMap<>(); // 游戏状态
 
     // 初始化选项表 配置了常见的表述作为key，游戏数组的下标作为value
     static {

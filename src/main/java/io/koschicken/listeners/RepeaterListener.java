@@ -8,11 +8,12 @@ import com.forte.qqrobot.sender.MsgSender;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class RepeaterListener {
 
-    Map<String, Deque<String>> stackMap = new HashMap<>(); // 用于存储不同群的消息栈
+    Map<String, Deque<String>> stackMap = new ConcurrentHashMap<>(); // 用于存储不同群的消息栈
 
     @Listen(MsgGetTypes.groupMsg)
     @Filter(value = ".*")
