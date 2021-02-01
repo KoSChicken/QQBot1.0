@@ -151,7 +151,7 @@ public class RussianRouletteListener {
             return;
         }
         if (Boolean.TRUE.equals(bullet)) {
-            if (random < 901) {
+            if (random < 986) {
                 bulletCount--;
                 bullets.remove(0);
                 message = Constants.CQ_AT + qq + "] 死了，币-" + (shotCount + 1) * 10000;
@@ -166,7 +166,7 @@ public class RussianRouletteListener {
                     message = message + "，游戏结束。";
                     clear(groupCode);
                 }
-            } else if (random < 951){
+            } else if (random < 996){
                 message = Constants.CQ_AT + qq + "] 手里的枪卡壳了，还有" + bulletCount + "颗子弹。";
                 Collections.shuffle(bullets);
             } else {
