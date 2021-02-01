@@ -236,6 +236,18 @@ public class BotSettingListener {
     }
 
     @Listen(MsgGetTypes.privateMsg)
+    @Filter(value = {"刷新nekogun"}, keywordMatchType = KeywordMatchType.TRIM_EQUALS)
+    public void reloadNekoGun(PrivateMsg msg, MsgSender sender) {
+        String qq = msg.getQQ();
+        if (qq.equals(COMMON_CONFIG.getMasterQQ())) {
+            scoresService.clearNekoGun();
+            sender.SENDER.sendPrivateMsg(qq, "已刷新");
+        } else {
+            sender.SENDER.sendPrivateMsg(qq, "权限不足");
+        }
+    }
+
+    @Listen(MsgGetTypes.privateMsg)
     @Filter(value = {"清理临时文件夹"}, keywordMatchType = KeywordMatchType.TRIM_EQUALS)
     public void clearTemp(PrivateMsg msg, MsgSender sender) throws IOException {
         String qq = msg.getQQ();

@@ -30,6 +30,11 @@ public class ScoresServiceImpl extends ServiceImpl<ScoresMapper, Scores> impleme
     }
 
     @Override
+    public void clearNekoGun() {
+        scoresMapper.clearNekoGun();
+    }
+
+    @Override
     public Boolean selectSign(String qq) {
         return scoresMapper.selectSign(qq);
     }

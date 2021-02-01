@@ -20,6 +20,9 @@ public interface ScoresMapper extends BaseMapper<Scores> {
     @Update("update Scores set roll_count = 3")
     void clearRoll();
 
+    @Update("update Scores set nekogun = 10")
+    void clearNekoGun();
+
     @Select("select sign_flag from scores where qq = #{qq}")
     Boolean selectSign(@Param("qq") String qq);
 

@@ -11,6 +11,8 @@ public interface ScoresService extends IService<Scores> {
 
     void clearRoll();
 
+    void clearNekoGun();
+
     Boolean selectSign(String qq);
 
     void sign(String qq);

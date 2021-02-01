@@ -67,6 +67,7 @@ public class Daily {
     public void execute() throws IOException {
         scoresService.clearSign(); // 重置签到
         scoresService.clearRoll(); // 重置roll
+        scoresService.clearNekoGun(); // 重置nekogun
         clearTemp();
         luckyDog();
     }

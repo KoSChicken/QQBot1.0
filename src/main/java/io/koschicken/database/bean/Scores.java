@@ -31,4 +31,7 @@ public class Scores implements Serializable {
 
     @TableField(value = "cygames_win")
     private Integer cygamesWin;
+
+    @TableField(value = "nekogun")
+    private Integer nekogun;
 }
