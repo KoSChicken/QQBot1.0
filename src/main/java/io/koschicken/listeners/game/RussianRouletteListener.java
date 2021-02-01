@@ -65,6 +65,20 @@ public class RussianRouletteListener {
     }
 
     @Listen(MsgGetTypes.groupMsg)
+    @Filter(value = {"#nekogun"})
+    public void nekoGun(GroupMsg msg, MsgSender sender) {
+        String qq = msg.getQQ();
+        String groupCode = msg.getGroupCode();
+        String message = Constants.CQ_AT + qq + "] 拿起nekogun装填了1颗子弹，随后向neko扣动了扳机";
+        if ("1412425745".equals(qq)) {
+            message += "，枪炸了，马币清空:)";
+        } else {
+            message += "，但因为持枪者不是neko，nekogun拒绝开枪。";
+        }
+        sender.SENDER.sendGroupMsg(groupCode, message);
+    }
+
+    @Listen(MsgGetTypes.groupMsg)
     @Filter(value = {"#R"})
     public void endRoulette(GroupMsg msg, MsgSender sender) {
         String qq = msg.getQQ();
@@ -137,7 +151,7 @@ public class RussianRouletteListener {
             return;
         }
         if (Boolean.TRUE.equals(bullet)) {
-            if (random < 996) {
+            if (random < 901) {
                 bulletCount--;
                 bullets.remove(0);
                 message = Constants.CQ_AT + qq + "] 死了，币-" + (shotCount + 1) * 10000;
@@ -152,9 +166,13 @@ public class RussianRouletteListener {
                     message = message + "，游戏结束。";
                     clear(groupCode);
                 }
-            } else {
+            } else if (random < 951){
                 message = Constants.CQ_AT + qq + "] 手里的枪卡壳了，还有" + bulletCount + "颗子弹。";
                 Collections.shuffle(bullets);
+            } else {
+                message = Constants.CQ_AT + qq + "] 手里的枪爆炸了，马币清空。";
+                score.setScore(0L);
+                scoresService.updateById(score);
             }
         } else {
             long rate = bullets.size() / (bullets.size() - bulletCount);
