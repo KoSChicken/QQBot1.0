@@ -150,5 +150,6 @@ public class RussianRouletteListener {
     private void clear(String groupCode) {
         gunMap.remove(groupCode);
         dead.remove(groupCode);
+        continuous.remove(groupCode);
     }
 }
