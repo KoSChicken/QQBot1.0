@@ -31,13 +31,13 @@ public class RussianRouletteListener {
     ScoresServiceImpl scoresService;
 
     @Listen(MsgGetTypes.groupMsg)
-    @Filter(value = {"#轮盘说明"})
+    @Filter(value = {"#轮盘说明", "輪盤說明"})
     public void rouletteHelp(GroupMsg msg, MsgSender sender) {
         sender.SENDER.sendGroupMsg(msg.getGroupCode(), "#轮盘#[1-6] 不输入数字则默认为1 创建游戏\n创建游戏的人会先开枪\n再次输入#轮盘 开枪\n");
     }
 
     @Listen(MsgGetTypes.groupMsg)
-    @Filter(value = {"#轮盘.*"})
+    @Filter(value = {"#轮盘.*", "#輪盤.*"})
     public void startRoulette(GroupMsg msg, MsgSender sender) {
         String qq = msg.getQQ();
         String groupCode = msg.getGroupCode();
@@ -66,7 +66,7 @@ public class RussianRouletteListener {
     }
 
     @Listen(MsgGetTypes.groupMsg)
-    @Filter(value = {"#R"})
+    @Filter(value = {"#R", "#r"})
     public void endRoulette(GroupMsg msg, MsgSender sender) {
         String qq = msg.getQQ();
         String groupCode = msg.getGroupCode();

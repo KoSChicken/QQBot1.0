@@ -103,7 +103,7 @@ public class CoinListener {
     }
 
     @Listen(MsgGetTypes.groupMsg)
-    @Filter(value = {"我有多少钱", "余额"}, keywordMatchType = KeywordMatchType.TRIM_EQUALS)
+    @Filter(value = {"我有多少钱", "我有多少錢", "余额", "餘額"}, keywordMatchType = KeywordMatchType.TRIM_EQUALS)
     public void myCoin(GroupMsg msg, MsgSender sender) {
         String qq = msg.getQQ();
         Scores scores = scoresService.getById(qq);

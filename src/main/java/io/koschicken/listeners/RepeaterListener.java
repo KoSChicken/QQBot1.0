@@ -49,10 +49,13 @@ public class RepeaterListener {
     private boolean repeatFlag(String msg) {
         List<String> commandList = new ArrayList<>();
         commandList.add("签到");
+        commandList.add("簽到");
         commandList.add("骰子说明");
         commandList.add("叫车");
         commandList.add("余额");
+        commandList.add("餘額");
         commandList.add("我有多少钱");
+        commandList.add("我有多少錢");
         boolean containsSharp = msg.contains("#");
         return containsSharp || commandList.contains(msg);
     }
