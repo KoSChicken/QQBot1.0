@@ -67,10 +67,11 @@ public class NekoGunListener {
         Scores score = scoresService.getById(qq);
         Long s = score.getScore();
         if (s > 10000) {
-            score.setNekogun(score.getNekogun() + 10);
+            int nekogunRemain = score.getNekogun() + 10;
+            score.setNekogun(nekogunRemain);
             score.setScore(s - 10000);
             scoresService.updateById(score);
-            String message = Constants.CQ_AT + qq + "] 重新装填nekogun，剩余生命值：" + (s - 10000);
+            String message = Constants.CQ_AT + qq + "] 重新装填nekogun，剩余生命值：" + (s - 10000) + "，剩余子弹：" + nekogunRemain;
             sender.SENDER.sendGroupMsg(groupCode, message);
         } else {
             sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "] 生命值不足");
