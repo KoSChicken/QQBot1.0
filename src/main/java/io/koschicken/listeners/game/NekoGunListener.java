@@ -57,7 +57,7 @@ public class NekoGunListener {
         Scores score = scoresService.getById(qq);
         Long s = score.getScore();
         if (s > 10000) {
-            score.setNekogun(10);
+            score.setNekogun(score.getNekogun() + 10);
             score.setScore(s - 10000);
             scoresService.updateById(score);
             String message = Constants.CQ_AT + qq + "] 重新装填了nekogun，剩余生命值：" + (s - 10000);
