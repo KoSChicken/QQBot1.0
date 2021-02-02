@@ -32,17 +32,27 @@ public class NekoGunListener {
         if (score.getNekogun() > 0) {
             score.setNekogun(score.getNekogun() - 1);
             scoresService.updateById(score);
-            String message = Constants.CQ_AT + qq + "] 拿起nekogun开始乱射，";
+            String message = Constants.CQ_AT + qq + "] 击中 ";
             List<Scores> list = scoresService.listByGroupCode(groupCode);
             Collections.shuffle(list);
             Scores scores = list.get(0);
-            int i = RandomUtils.nextInt(1, 10001);
+            int i = RandomUtils.nextInt(5000, 50001);
+            int cri = RandomUtils.nextInt(1, 101);
+            boolean flag = false;
+            if (cri >= 80) {
+                i *= 2;
+                flag = true;
+            }
             long max = Math.max(0, scores.getScore() - i);
             scores.setScore(max);
             scoresService.updateById(scores);
             GroupMemberInfo info = sender.GETTER.getGroupMemberInfo(groupCode, scores.getQq());
             String target = Utils.dealCard(info.getCard()) + "(" + info.getQQ() + ")";
-            message += "射中" + target + "造成" + i + "点伤害，" + target + "剩余生命值" + max;
+            message += target + "造成" + i + "点伤害";
+            if (flag) {
+                message += "（爆击！）";
+            }
+            message += "，" + target + "剩余生命值：" + max;
             sender.SENDER.sendGroupMsg(groupCode, message);
         } else {
             sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "] 没子弹了，发送 #nekogun-r 消耗一万生命值恢复子弹。");
@@ -60,7 +70,7 @@ public class NekoGunListener {
             score.setNekogun(score.getNekogun() + 10);
             score.setScore(s - 10000);
             scoresService.updateById(score);
-            String message = Constants.CQ_AT + qq + "] 重新装填了nekogun，剩余生命值：" + (s - 10000);
+            String message = Constants.CQ_AT + qq + "] 重新装填nekogun，剩余生命值：" + (s - 10000);
             sender.SENDER.sendGroupMsg(groupCode, message);
         } else {
             sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "] 生命值不足");
