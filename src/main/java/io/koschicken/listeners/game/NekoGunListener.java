@@ -21,7 +21,7 @@ public class NekoGunListener {
     public void nekoGun(GroupMsg msg, MsgSender sender) {
         String qq = msg.getQQ();
         String groupCode = msg.getGroupCode();
-        sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "love & peace");
+        sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "] love & peace");
 //        Scores score = scoresService.getById(qq);
 //        if (score.getNekogun() > 0) {
 //            score.setNekogun(score.getNekogun() - 1);
@@ -58,7 +58,7 @@ public class NekoGunListener {
     public void nekoGunReload(GroupMsg msg, MsgSender sender) {
         String qq = msg.getQQ();
         String groupCode = msg.getGroupCode();
-        sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "love & peace");
+        sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "] love & peace");
 //        Scores score = scoresService.getById(qq);
 //        Long s = score.getScore();
 //        if (s > 10000) {
