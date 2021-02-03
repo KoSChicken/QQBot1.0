@@ -17,6 +17,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Component
 public class RussianRouletteListener {
@@ -46,14 +47,14 @@ public class RussianRouletteListener {
             sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "] 死人不要参加游戏。");
         } else {
             List<Boolean> bullets = gunMap.get(groupCode);
-            deadList = new ArrayList<>();
+            deadList = new CopyOnWriteArrayList<>();
             if (bullets != null && bullets.contains(true)) {
                 LOGGER.info("{}群开枪前：{}", groupCode, printBullets(bullets));
                 int bulletCount = countBullets(bullets);
                 // 开枪
                 shot(sender, qq, groupCode, bullets, bulletCount, deadList);
             } else {
-                bullets = new ArrayList<>();
+                bullets = new CopyOnWriteArrayList<>();
                 int bulletCount = load(msg, bullets);
                 gunMap.put(groupCode, bullets);
                 LOGGER.info("{}群开枪前：{}", groupCode, printBullets(bullets));
@@ -145,8 +146,8 @@ public class RussianRouletteListener {
                 map.remove(qq);
                 score.setScore(score.getScore() - ((shotCount + 1) * 10000L) >= 0 ? score.getScore() - ((shotCount + 1) * 10000L) : 0);
                 scoresService.updateById(score);
+                deadList.add(qq);
                 if (bulletCount > 0) {
-                    deadList.add(qq);
                     dead.put(groupCode, deadList);
                     message = message + "，还有" + bulletCount + "颗子弹。";
                 } else {
