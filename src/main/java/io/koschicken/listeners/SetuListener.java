@@ -13,6 +13,7 @@ import io.koschicken.bean.Pixiv;
 import io.koschicken.constants.Constants;
 import io.koschicken.database.bean.Scores;
 import io.koschicken.database.service.ScoresService;
+import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -226,21 +228,13 @@ public class SetuListener {
                 if ("200".equals(code) || fromLolicon || Objects.isNull(code)) {
                     for (Pixiv p : setu) {
                         String filename = p.getFileName();
-                        File pic;
-                        String imageUrl;
-                        if (filename.contains("http")) {
-                            imageUrl = filename;
-                            pic = new File(TEMP + filename.substring(filename.lastIndexOf("/") + 1));
-                        } else {
-                            imageUrl = p.getOriginal().replace("pximg.net", "pixiv.cat");
-                            pic = new File(TEMP + filename);
-                        }
-                        InputStream content = Request.Get(imageUrl).setHeader(UA, UA_STRING).execute().returnResponse().getEntity().getContent();
-                        if (!pic.exists()) {
-                            FileUtils.copyInputStreamToFile(content, pic);
+                        String imageUrl = p.getOriginal();
+                        File compressedJPG = new File(TEMP + filename.replace("png", "jpg"));
+                        if (!compressedJPG.exists()) {
+                            Thumbnails.of(new URL(imageUrl)).scale(1).outputQuality(0.25).toFile(compressedJPG);
                         }
                         // 发送图片
-                        String image = kqCodeUtils.toCq(Constants.cqType.IMAGE, Constants.cqPrefix.FILE + pic.getAbsolutePath());
+                        String image = kqCodeUtils.toCq(Constants.cqType.IMAGE, Constants.cqPrefix.FILE + compressedJPG.getAbsolutePath());
                         String message = image + "\n" +
                                 p.getTitle() + "\n" +
                                 ARTWORK_PREFIX + p.getArtwork() + "\n" +

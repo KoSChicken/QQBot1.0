@@ -37,18 +37,18 @@ public class SetuUtils {
     }
 
     private SetuUtils() {
-
     }
 
     public static List<Pixiv> getSetu(String tag, int num, Boolean r18) throws IOException {
-        List<Pixiv> pixivList = fetchFromLolicon(num, tag, r18);
-        if ("0".equals(pixivList.get(0).getCode())) {
-            // 请求lolicon的API成功则返回
-            return pixivList;
-        } else {
-            // 否则请求yuban
-            return fetchFromYuban1073(num, tag, r18);
-        }
+//        List<Pixiv> pixivList = fetchFromLolicon(num, tag, r18);
+//        if ("0".equals(pixivList.get(0).getCode())) {
+//            // 请求lolicon的API成功则返回
+//            return pixivList;
+//        } else {
+//            // 否则请求yuban
+//            return fetchFromYuban1073(num, tag, r18);
+//        }
+        return fetchFromLolicon(num, tag, r18);
     }
 
     private static List<Pixiv> fetchFromYuban1073(int num, String tag, Boolean r18) throws IOException {
@@ -126,7 +126,7 @@ public class SetuUtils {
         pixiv.setTags(data.getString("tags").split(","));
         pixiv.setType(data.getString("type"));
         pixiv.setFileName(data.getString("filename"));
-        pixiv.setOriginal(data.getString("original"));
+        pixiv.setOriginal(data.getString("original").replace("pximg.net", "pixiv.cat"));
         pixiv.setR18("porn".equals(data.getString("type")));
     }
 
@@ -137,7 +137,7 @@ public class SetuUtils {
         pixiv.setArtist(data.getString("uid"));
         pixiv.setTags(data.getString("tags").split(","));
         pixiv.setType(Boolean.TRUE.equals(data.getBoolean("r18")) ? "r18" : "normal");
-        pixiv.setFileName(data.getString("url"));
+        pixiv.setFileName(data.getString("url").substring(data.getString("url").lastIndexOf("/") + 1));
         pixiv.setOriginal(data.getString("url"));
         pixiv.setR18(Boolean.parseBoolean(data.getString("r18")));
     }
