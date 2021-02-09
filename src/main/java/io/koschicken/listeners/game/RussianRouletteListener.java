@@ -24,6 +24,8 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static io.koschicken.constants.Constants.COMMON_CONFIG;
+
 @Component
 public class RussianRouletteListener {
 
@@ -65,15 +67,20 @@ public class RussianRouletteListener {
     public void endRoulette(GroupMsg msg, MsgSender sender) {
         String qq = msg.getQQ();
         String groupCode = msg.getGroupCode();
-        List<Boolean> bullets = gunMap.get(groupCode);
-        if (!CollectionUtils.isEmpty(bullets) && countBullets(bullets) == bullets.size()) {
+        if (qq.equals(COMMON_CONFIG.getMasterQQ())) {
             clear(groupCode);
-            sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "] 扔掉手枪停止了游戏。");
+            sender.SENDER.sendGroupMsg(groupCode, "💥");
         } else {
-            if (bullets == null) {
-                sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "] 当前没有手枪。");
+            List<Boolean> bullets = gunMap.get(groupCode);
+            if (!CollectionUtils.isEmpty(bullets) && countBullets(bullets) == bullets.size()) {
+                clear(groupCode);
+                sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "] 扔掉手枪停止了游戏。");
             } else {
-                sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "] 游戏没有结束谁都不许下车。");
+                if (bullets == null) {
+                    sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "] 当前没有手枪。");
+                } else {
+                    sender.SENDER.sendGroupMsg(groupCode, Constants.CQ_AT + qq + "] 游戏没有结束谁都不许下车。");
+                }
             }
         }
     }
