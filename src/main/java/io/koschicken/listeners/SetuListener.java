@@ -94,7 +94,7 @@ public class SetuListener {
 
     @Limit(CD)
     @Listen(MsgGetTypes.groupMsg)
-    @Filter(value = {"叫车(.*)(.*)?(|r18)", "来(.*?)[点丶份张幅](.*?)的?(|r18)[色瑟涩][图圖]"})
+    @Filter(value = {"叫[车車](.*)(.*)?(|r18)", "来(.*?)[点丶份张張](.*?)的?(|r18)[色瑟涩][图圖]"})
     public void driver(GroupMsg msg, MsgSender sender) {
         Scores coin = scoresService.getById(msg.getCodeNumber());
         if (coin == null) {
@@ -111,7 +111,7 @@ public class SetuListener {
 
     private void sendPic(GroupMsg msg, MsgSender sender, Scores coin) {
         String message = msg.getMsg();
-        String regex = message.startsWith("叫车") ? "叫车(.*)(.*)?(|r18)" : "来(.*?)[点點丶份张張](.*?)的?(|r18)[色瑟涩澀][图圖]";
+        String regex = message.startsWith("叫") ? "叫[车車](.*)(.*)?(|r18)" : "来(.*?)[点點丶份张張](.*?)的?(|r18)[色瑟涩澀][图圖]";
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(message);
         int num = 1;
