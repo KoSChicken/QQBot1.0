@@ -100,46 +100,55 @@ public class SetuListener {
         if (coin == null) {
             createScore(msg, sender);
         } else {
-            if (coin.getScore() >= price) {
-                String message = msg.getMsg();
-                String regex = message.startsWith("叫车") ? "叫车(.*)(.*)?(|r18)" : "来(.*?)[点丶份张幅](.*?)的?(|r18)[色瑟涩][图圖]";
-                Pattern p = Pattern.compile(regex);
-                Matcher m = p.matcher(message);
-                int num = 1;
-                String tag = "";
-                boolean r18 = false;
-                String number;
-                while (m.find()) {
-                    // 兼容原有的叫车功能
-                    if (message.startsWith("叫车")) {
-                        number = m.group(2).trim();
-                        tag = m.group(1).trim();
-                    } else {
-                        number = m.group(1).trim();
-                        tag = m.group(2).trim();
-                    }
-                    try {
-                        num = NUMBER.get(number) == null ? Integer.parseInt(number) : NUMBER.get(number);
-                    } catch (NumberFormatException ignore) {
-                        LOGGER.info("number set to 1");
-                    }
-                    r18 = !StringUtils.isEmpty(m.group(3).trim());
-                }
-                // 发图
-                GroupMemberList groupMemberList = sender.GETTER.getGroupMemberList(msg.getGroup());
-                for (GroupMember member : groupMemberList) {
-                    String remarkOrNickname = member.getRemarkOrNickname().trim();
-                    if (Objects.equals(tag, remarkOrNickname)) {
-                        LOGGER.info("群名片：{}\ttag: {}", remarkOrNickname, tag);
-                        groupMember(msg, sender, member.getQQCode());
-                        return;
-                    }
-                }
-                SendSetu sendSetu = new SendSetu(msg.getGroupCode(), msg.getQQ(), sender, tag, num, r18, coin, scoresService);
-                sendSetu.start();
+            int i = RandomUtils.nextInt(1, 100);
+            if (i <= 3) {
+                sender.SENDER.sendGroupMsg(msg.getGroupCode(), "累了，不想发车。");
             } else {
-                sender.SENDER.sendGroupMsg(msg.getGroupCode(), CQ_AT + msg.getQQCode() + "]" + "你没钱了，请尝试签到或找开发者PY");
+                sendPic(msg, sender, coin);
             }
+        }
+    }
+
+    private void sendPic(GroupMsg msg, MsgSender sender, Scores coin) {
+        String message = msg.getMsg();
+        String regex = message.startsWith("叫车") ? "叫车(.*)(.*)?(|r18)" : "来(.*?)[点點丶份张張](.*?)的?(|r18)[色瑟涩澀][图圖]";
+        Pattern p = Pattern.compile(regex);
+        Matcher m = p.matcher(message);
+        int num = 1;
+        String tag = "";
+        boolean r18 = false;
+        String number;
+        while (m.find()) {
+            // 兼容原有的叫车功能
+            if (message.startsWith("叫车")) {
+                number = m.group(2).trim();
+                tag = m.group(1).trim();
+            } else {
+                number = m.group(1).trim();
+                tag = m.group(2).trim();
+            }
+            try {
+                num = NUMBER.get(number) == null ? Integer.parseInt(number) : NUMBER.get(number);
+            } catch (NumberFormatException ignore) {
+                LOGGER.info("number set to 1");
+            }
+            r18 = !StringUtils.isEmpty(m.group(3).trim());
+        }
+        if (coin.getScore() >= price * num) {
+            // 发图
+            GroupMemberList groupMemberList = sender.GETTER.getGroupMemberList(msg.getGroup());
+            for (GroupMember member : groupMemberList) {
+                String remarkOrNickname = member.getRemarkOrNickname().trim();
+                if (Objects.equals(tag, remarkOrNickname)) {
+                    LOGGER.info("群名片：{}\ttag: {}", remarkOrNickname, tag);
+                    groupMember(msg, sender, member.getQQCode());
+                    return;
+                }
+            }
+            SendSetu sendSetu = new SendSetu(msg.getGroupCode(), msg.getQQ(), sender, tag, num, r18, coin, scoresService);
+            sendSetu.start();
+        } else {
+            sender.SENDER.sendGroupMsg(msg.getGroupCode(), CQ_AT + msg.getQQCode() + "]" + "你没钱了，请尝试签到或找开发者PY");
         }
     }
 
