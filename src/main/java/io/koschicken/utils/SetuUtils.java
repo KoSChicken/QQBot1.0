@@ -21,7 +21,7 @@ import java.util.Map;
 import static io.koschicken.constants.Constants.COMMON_CONFIG;
 
 public class SetuUtils {
-    private static final String YUBAN1073API = "http://api.yuban10703.xyz:2333/setu_v3";
+    private static final String YUBAN1073API = "http://api.yuban10703.xyz:2333/setu_v4";
     private static final String LOLICONAPI = "https://api.lolicon.app/setu/";
     private static final Map<Integer, String> CODE_MAP;
     private static final Logger LOGGER = LoggerFactory.getLogger(SetuUtils.class);
@@ -40,15 +40,15 @@ public class SetuUtils {
     }
 
     public static List<Pixiv> getSetu(String tag, int num, Boolean r18) throws IOException {
-//        List<Pixiv> pixivList = fetchFromLolicon(num, tag, r18);
-//        if ("0".equals(pixivList.get(0).getCode())) {
-//            // 请求lolicon的API成功则返回
-//            return pixivList;
-//        } else {
-//            // 否则请求yuban
-//            return fetchFromYuban1073(num, tag, r18);
-//        }
-        return fetchFromLolicon(num, tag, r18);
+        List<Pixiv> pixivList = fetchFromLolicon(num, tag, r18);
+        if ("0".equals(pixivList.get(0).getCode())) {
+            // 请求lolicon的API成功则返回
+            return pixivList;
+        } else {
+            // 否则请求yuban
+            return fetchFromYuban1073(num, tag, r18);
+        }
+        // return fetchFromLolicon(num, tag, r18);
     }
 
     private static List<Pixiv> fetchFromYuban1073(int num, String tag, Boolean r18) throws IOException {
