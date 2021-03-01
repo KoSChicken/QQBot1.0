@@ -222,7 +222,7 @@ public class PCRListener {
             int q = RANDOM.nextInt(SSR_CHANCE);
             if (q < UP_SSR_CHANCE) {
                 //抽出来up角色
-                map1.merge(SSR_UP[q % SSR_UP.length], 1, Integer::sum);
+                map1.merge(SSR_UP[q % Math.max(SSR_UP.length, 1)], 1, Integer::sum);
             } else {
                 int j = RANDOM.nextInt(NO_UP_SSR.length);
                 map1.merge(NO_UP_SSR[j], 1, Integer::sum);
