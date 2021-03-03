@@ -101,7 +101,7 @@ public class SetuListener {
             createScore(msg, sender);
         } else {
             int i = RandomUtils.nextInt(1, 100);
-            if (i <= 3) {
+            if (i <= 10) {
                 sender.SENDER.sendGroupMsg(msg.getGroupCode(), "累了，不想发车。");
             } else {
                 sendPic(msg, sender, coin);
@@ -240,29 +240,13 @@ public class SetuListener {
                         String imageUrl = p.getOriginal();
                         File compressedJPG = new File(TEMP + filename.replace("png", "jpg"));
                         if (!compressedJPG.exists()) {
-                            Thumbnails.of(new URL(imageUrl)).scale(1).outputQuality(0.25).toFile(compressedJPG);
-                        }
-                        // 发送图片
-                        String image = kqCodeUtils.toCq(Constants.cqType.IMAGE, Constants.cqPrefix.FILE + compressedJPG.getAbsolutePath());
-                        String message = image + "\n" +
-                                p.getTitle() + "\n" +
-                                ARTWORK_PREFIX + p.getArtwork() + "\n" +
-                                p.getAuthor() + "\n" +
-                                ARTIST_PREFIX + p.getArtist() + "\n";
-                        // + "tags:" + Arrays.toString(p.getTags());
-                        if (fromLolicon) {
-                            message += "\n" + "今日剩余额度：" + p.getQuota();
-                        }
-                        if (StringUtils.isEmpty(groupCode)) { // 不是群消息，则直接私聊
-                            sender.SENDER.sendPrivateMsg(privateQQ, message);
+                            sendPic(fromLolicon, p, imageUrl, compressedJPG);
+                            sendCount++;
                         } else {
-                            if (!p.isR18()) { // 非R18且叫车的是群消息
-                                sender.SENDER.sendGroupMsg(groupCode, message);
-                            } else {  // R18则发送私聊
-                                sender.SENDER.sendPrivateMsg(privateQQ, message);
+                            if (!p.isR18()) {
+                                sender.SENDER.sendGroupMsg(groupCode, "重复图片");
                             }
                         }
-                        sendCount++;
                     }
                     coin.setScore((long) (coin.getScore() - price * sendCount));
                     scoresService.updateById(coin); // 按照实际发送的张数来扣除叫车者的币
@@ -276,6 +260,30 @@ public class SetuListener {
             } catch (IOException e) {
                 e.printStackTrace();
                 sender.SENDER.sendGroupMsg(groupCode, "炸了");
+            }
+        }
+
+        private void sendPic(boolean fromLolicon, Pixiv p, String imageUrl, File compressedJPG) throws IOException {
+            Thumbnails.of(new URL(imageUrl)).scale(1).outputQuality(0.25).toFile(compressedJPG);
+            // 发送图片
+            String image = kqCodeUtils.toCq(Constants.cqType.IMAGE, Constants.cqPrefix.FILE + compressedJPG.getAbsolutePath());
+            String message = image + "\n" +
+                    p.getTitle() + "\n" +
+                    ARTWORK_PREFIX + p.getArtwork() + "\n" +
+                    p.getAuthor() + "\n" +
+                    ARTIST_PREFIX + p.getArtist() + "\n";
+            // + "tags:" + Arrays.toString(p.getTags());
+            if (fromLolicon) {
+                message += "\n" + "今日剩余额度：" + p.getQuota();
+            }
+            if (StringUtils.isEmpty(groupCode)) { // 不是群消息，则直接私聊
+                sender.SENDER.sendPrivateMsg(privateQQ, message);
+            } else {
+                if (!p.isR18()) { // 非R18且叫车的是群消息
+                    sender.SENDER.sendGroupMsg(groupCode, message);
+                } else {  // R18则发送私聊
+                    sender.SENDER.sendPrivateMsg(privateQQ, message);
+                }
             }
         }
     }
