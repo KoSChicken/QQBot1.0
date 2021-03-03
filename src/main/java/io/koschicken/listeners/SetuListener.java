@@ -239,12 +239,13 @@ public class SetuListener {
                         String filename = p.getFileName();
                         String imageUrl = p.getOriginal();
                         File compressedJPG = new File(TEMP + filename.replace("png", "jpg"));
-                        if (!compressedJPG.exists()) {
+                        if (!compressedJPG.exists() || System.currentTimeMillis() - compressedJPG.lastModified() > 60 * 60 * 1000) {
+                            // 图片1小时内没发过才会发
                             sendPic(fromLolicon, p, imageUrl, compressedJPG);
                             sendCount++;
                         } else {
                             if (!p.isR18()) {
-                                sender.SENDER.sendGroupMsg(groupCode, "重复图片");
+                                sender.SENDER.sendGroupMsg(groupCode, "含有 " + tag + " 的车已经发完了");
                             }
                             return;
                         }
