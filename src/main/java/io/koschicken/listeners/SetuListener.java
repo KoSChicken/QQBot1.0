@@ -246,6 +246,7 @@ public class SetuListener {
                             if (!p.isR18()) {
                                 sender.SENDER.sendGroupMsg(groupCode, "重复图片");
                             }
+                            return;
                         }
                     }
                     coin.setScore((long) (coin.getScore() - price * sendCount));
