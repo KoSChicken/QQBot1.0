@@ -245,7 +245,7 @@ public class SetuListener {
                             sendCount++;
                         } else {
                             if (!p.isR18()) {
-                                LOGGER.info("------- 图片名称：" + filename);
+                                LOGGER.info("------- 图片名称：{}", filename);
                                 sender.SENDER.sendGroupMsg(groupCode, "含有 " + tag + " 的车已经发完了");
                             }
                             return;
