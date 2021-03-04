@@ -1,5 +1,7 @@
 package io.koschicken.listeners;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.forte.qqrobot.anno.Filter;
 import com.forte.qqrobot.anno.Listen;
 import com.forte.qqrobot.beans.messages.msgget.GroupMsg;
@@ -17,8 +19,11 @@ import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Consts;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.fluent.Request;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +56,7 @@ public class SetuListener {
     private static final String AVATAR_API = "http://thirdqq.qlogo.cn/g?b=qq&nk=";
     private static final String AWSL = "https://setu.awsl.ee/api/setu!";
     private static final String MJX = "https://api.66mz8.com/api/rand.tbimg.php?format=pic";
+    private static final String MEOW = "http://aws.random.cat/meow";
     private static final String UA = "User-Agent";
     private static final String UA_STRING = "Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3";
     private static final int CD = 20;
@@ -150,6 +156,26 @@ public class SetuListener {
         } else {
             sender.SENDER.sendGroupMsg(msg.getGroupCode(), CQ_AT + msg.getQQCode() + "]" + "你没钱了，请尝试签到或找开发者PY");
         }
+    }
+
+    @Listen(MsgGetTypes.groupMsg)
+    @Filter(value = "喵(.*?)")
+    public void meow(GroupMsg msg, MsgSender sender) throws IOException {
+        String groupCode = msg.getGroupCode();
+        ResponseHandler<String> myHandler = response -> EntityUtils.toString(response.getEntity(), Consts.UTF_8);
+        String response = Request.Get(MEOW).addHeader(UA, UA_STRING).execute().handleResponse(myHandler);
+        JSONObject jsonObject = JSON.parseObject(response);
+        String fileUrl = jsonObject.getString("file");
+        String fileSuffix = fileUrl.substring(fileUrl.lastIndexOf("."));
+        String uuid = UUID.randomUUID().toString();
+        File file = new File(TEMP + uuid + fileSuffix);
+        if (!Objects.equals(fileSuffix, ".gif")) {
+            Thumbnails.of(new URL(fileUrl.replace("https", "http"))).scale(1).outputQuality(0.25).toFile(file);
+        } else {
+            FileUtils.copyURLToFile(new URL(fileUrl.replace("https", "http")), file);
+        }
+        String image = kqCodeUtils.toCq(Constants.cqType.IMAGE, Constants.cqPrefix.FILE + file.getAbsolutePath());
+        sender.SENDER.sendGroupMsg(groupCode, image);
     }
 
     @Listen(MsgGetTypes.groupMsg)
