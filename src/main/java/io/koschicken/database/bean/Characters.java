@@ -22,6 +22,19 @@ public class Characters implements Serializable {
 
     private String profile;
 
+    private Boolean duel;
+
+    private String master;
+
+    public Characters(Integer id, Integer code, String name, String profile, Boolean duel, String master) {
+        this.id = id;
+        this.code = code;
+        this.name = name;
+        this.profile = profile;
+        this.duel = duel;
+        this.master = master;
+    }
+
     public Integer getId() {
         return id;
     }
@@ -54,13 +67,19 @@ public class Characters implements Serializable {
         this.profile = profile;
     }
 
-    @Override
-    public String toString() {
-        return "Characters{" +
-                "id=" + id +
-                ", code=" + code +
-                ", name='" + name + '\'' +
-                ", profile='" + profile + '\'' +
-                '}';
+    public Boolean getDuel() {
+        return duel;
+    }
+
+    public void setDuel(Boolean duel) {
+        this.duel = duel;
+    }
+
+    public String getMaster() {
+        return master;
+    }
+
+    public void setMaster(String master) {
+        this.master = master;
     }
 }

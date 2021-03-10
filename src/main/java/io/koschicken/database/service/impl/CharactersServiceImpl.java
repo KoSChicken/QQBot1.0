@@ -21,7 +21,27 @@ public class CharactersServiceImpl extends ServiceImpl<CharactersMapper, Charact
     }
 
     @Override
+    public List<Characters> listAll() {
+        return charactersMapper.listAll();
+    }
+
+    @Override
     public List<Characters> list(Integer excludeCode, Integer limit) {
         return charactersMapper.list(excludeCode, limit);
+    }
+
+    @Override
+    public void update(Integer code, String master) {
+        charactersMapper.update(code, master);
+    }
+
+    @Override
+    public List<Characters> listByMaster(String master) {
+        return charactersMapper.listByMaster(master);
+    }
+
+    @Override
+    public String findMasterByName(String name) {
+        return charactersMapper.findMasterByName("%" + name + "%");
     }
 }
