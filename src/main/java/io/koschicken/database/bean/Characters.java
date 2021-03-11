@@ -1,7 +1,5 @@
 package io.koschicken.database.bean;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
@@ -13,9 +11,6 @@ public class Characters implements Serializable {
 
     private static final long serialVersionUID = 6503985789018451916L;
 
-    @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
-
     private Integer code;
 
     private String name;
@@ -26,21 +21,12 @@ public class Characters implements Serializable {
 
     private String master;
 
-    public Characters(Integer id, Integer code, String name, String profile, Boolean duel, String master) {
-        this.id = id;
+    public Characters(Integer code, String name, String profile, Boolean duel, String master) {
         this.code = code;
         this.name = name;
         this.profile = profile;
         this.duel = duel;
         this.master = master;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public Integer getCode() {
