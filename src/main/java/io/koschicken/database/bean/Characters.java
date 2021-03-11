@@ -19,14 +19,11 @@ public class Characters implements Serializable {
 
     private Boolean duel;
 
-    private String master;
-
-    public Characters(Integer code, String name, String profile, Boolean duel, String master) {
+    public Characters(Integer code, String name, String profile, Boolean duel) {
         this.code = code;
         this.name = name;
         this.profile = profile;
         this.duel = duel;
-        this.master = master;
     }
 
     public Integer getCode() {
@@ -59,13 +56,5 @@ public class Characters implements Serializable {
 
     public void setDuel(Boolean duel) {
         this.duel = duel;
-    }
-
-    public String getMaster() {
-        return master;
-    }
-
-    public void setMaster(String master) {
-        this.master = master;
     }
 }

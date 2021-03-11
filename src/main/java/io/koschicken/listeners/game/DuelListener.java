@@ -144,7 +144,7 @@ public class DuelListener {
     }
 
     @Listen(MsgGetTypes.groupMsg)
-    @Filter(value = {".*接受.*", ".*拒绝.*"})
+    @Filter(value = {"#接受.*", "#拒绝.*"})
     public void duelResponse(GroupMsg msg, MsgSender sender) throws InterruptedException {
         String groupCode = msg.getGroupCode();
         String qq = msg.getQQ();
@@ -307,7 +307,8 @@ public class DuelListener {
         if (!CollectionUtils.isEmpty(characters)) {
             Collections.shuffle(characters);
             Characters character = characters.get(0);
-            character.setMaster(winner);
+            // FIXME 修改表结构，master不再记录在角色表里
+            //character.setMaster(winner);
             charactersService.updateById(character);
             return getName(character);
         } else {
