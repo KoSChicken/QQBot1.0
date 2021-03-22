@@ -8,8 +8,10 @@ import com.forte.qqrobot.beans.messages.types.MsgGetTypes;
 import com.forte.qqrobot.beans.messages.types.PowerType;
 import com.forte.qqrobot.beans.types.KeywordMatchType;
 import com.forte.qqrobot.sender.MsgSender;
+import com.simplerobot.modules.utils.KQCodeUtils;
 import io.koschicken.InitConfig;
 import io.koschicken.bean.GroupPower;
+import io.koschicken.constants.Constants;
 import io.koschicken.database.service.ScoresService;
 import io.koschicken.utils.JSONUtils;
 import org.apache.commons.io.FileUtils;
@@ -30,9 +32,12 @@ public class BotSettingListener {
     private ScoresService scoresService;
 
     @Listen(MsgGetTypes.groupMsg)
-    @Filter(value = {"wei,zaima?"}, keywordMatchType = KeywordMatchType.TRIM_EQUALS)
+    @Filter(value = {"xsp"}, keywordMatchType = KeywordMatchType.TRIM_EQUALS)
     public void check(GroupMsg msg, MsgSender sender) {
-        sender.SENDER.sendGroupMsg(msg.getGroupCode(), "buzai,cmn");
+        File file = new File("./image/greeting.jpg");
+        KQCodeUtils kqCodeUtils = KQCodeUtils.getInstance();
+        String str = kqCodeUtils.toCq(Constants.cqType.IMAGE, Constants.cqPrefix.FILE + file.getAbsolutePath());
+        sender.SENDER.sendGroupMsg(msg.getGroupCode(), str);
     }
 
     @Listen(MsgGetTypes.groupMsg)
