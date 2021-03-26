@@ -34,7 +34,8 @@ public class BotSettingListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BotSettingListener.class);
 
-    private static final String ZUICHOU = "https://nmsl.shadiao.app/api.php";
+    private static final String ZUICHOU = "https://zuanbot.com/api.php?lang=zh_cn";
+    private static final String ZUICHOU_REF = "https://zuanbot.com/";
     private static final String RAINBOW_FART = "https://chp.shadiao.app/api.php";
 
     @Autowired
@@ -51,18 +52,18 @@ public class BotSettingListener {
 
     @Listen(MsgGetTypes.groupMsg)
     @Filter(value = {"#讲几句难听的"}, keywordMatchType = KeywordMatchType.TRIM_EQUALS)
-    public void zuichou(GroupMsg msg, MsgSender sender) {
+    public void nmsl(GroupMsg msg, MsgSender sender) {
         int i = RandomUtils.nextInt(1, 101);
         LOGGER.info("nmsl? {}", i);
-        if (i >= 80) {
+        if (i >= 60) {
             try {
-                String rf = Request.Get(ZUICHOU).execute().returnContent().asString();
+                String rf = Request.Get(ZUICHOU).addHeader("Referer", ZUICHOU_REF).execute().returnContent().asString();
                 sender.SENDER.sendGroupMsg(msg.getGroupCode(), rf);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else {
-            sender.SENDER.sendGroupMsg(msg.getGroupCode(), "我是个有素质的bot");
+            sender.SENDER.sendGroupMsg(msg.getGroupCode(), "要有素质");
         }
     }
 
