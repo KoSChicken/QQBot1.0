@@ -15,7 +15,11 @@ import io.koschicken.constants.Constants;
 import io.koschicken.database.service.ScoresService;
 import io.koschicken.utils.JSONUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.fluent.Request;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +32,11 @@ import static io.koschicken.listeners.intercept.PCRIntercept.GROUP_CONFIG_MAP;
 @Service
 public class BotSettingListener {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(BotSettingListener.class);
+
+    private static final String ZUICHOU = "https://nmsl.shadiao.app/api.php";
+    private static final String RAINBOW_FART = "https://chp.shadiao.app/api.php";
+
     @Autowired
     private ScoresService scoresService;
 
@@ -38,6 +47,34 @@ public class BotSettingListener {
         KQCodeUtils kqCodeUtils = KQCodeUtils.getInstance();
         String str = kqCodeUtils.toCq(Constants.cqType.IMAGE, Constants.cqPrefix.FILE + file.getAbsolutePath());
         sender.SENDER.sendGroupMsg(msg.getGroupCode(), str);
+    }
+
+    @Listen(MsgGetTypes.groupMsg)
+    @Filter(value = {"#讲几句难听的"}, keywordMatchType = KeywordMatchType.TRIM_EQUALS)
+    public void zuichou(GroupMsg msg, MsgSender sender) {
+        int i = RandomUtils.nextInt(1, 101);
+        LOGGER.info("nmsl? {}", i);
+        if (i >= 80) {
+            try {
+                String rf = Request.Get(ZUICHOU).execute().returnContent().asString();
+                sender.SENDER.sendGroupMsg(msg.getGroupCode(), rf);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            sender.SENDER.sendGroupMsg(msg.getGroupCode(), "我是个有素质的bot");
+        }
+    }
+
+    @Listen(MsgGetTypes.groupMsg)
+    @Filter(value = {"#讲几句好听的"}, keywordMatchType = KeywordMatchType.TRIM_EQUALS)
+    public void rainbowFart(GroupMsg msg, MsgSender sender) {
+        try {
+            String rf = Request.Get(RAINBOW_FART).execute().returnContent().asString();
+            sender.SENDER.sendGroupMsg(msg.getGroupCode(), rf);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Listen(MsgGetTypes.groupMsg)
