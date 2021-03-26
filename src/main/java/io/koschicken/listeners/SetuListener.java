@@ -98,6 +98,12 @@ public class SetuListener {
     @Value("${setu.price}")
     private double price;
 
+    @Listen(MsgGetTypes.groupMsg)
+    @Filter(value = {"贵族叫车", "貴族叫車"})
+    public void driverG(GroupMsg msg, MsgSender sender) {
+        sender.SENDER.sendGroupMsg(msg.getGroupCode(), "/hso");
+    }
+
     @Limit(CD)
     @Listen(MsgGetTypes.groupMsg)
     @Filter(value = {"叫[车車](.*)(.*)?(|r18)", "来(.*?)[点丶份张張](.*?)的?(|r18)[色瑟涩][图圖]"})
